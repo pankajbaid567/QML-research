@@ -1,0 +1,32 @@
+[project]
+name = "qdrift"
+version = "0.1.0"
+description = "Noise drift of quantum classifiers on IBM Heron hardware"
+readme = "README.md"
+authors = [
+    { name = "pankajbaid567", email = "pankaj.baid2024@nst.rishihood.edu.in" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "matplotlib==3.11.2",
+    "numpy==2.5.4",
+    "pandas==3.1.0",
+    "qiskit==2.6.1",
+    "qiskit-aer==0.18.0",
+    "qiskit-ibm-runtime==0.51.0",
+    "scikit-learn==1.9.1",
+    "scipy==1.18.1",
+    "statsmodels==0.15.0",
+]
+
+[project.scripts]
+qdrift = "qdrift.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.11.25,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest==9.1.1",
+]

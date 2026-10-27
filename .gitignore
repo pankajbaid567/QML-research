@@ -1,0 +1,26 @@
+# Python
+.venv/
+__pycache__/
+*.py[oc]
+build/
+dist/
+*.egg-info
+.pytest_cache/
+
+# Secrets and local account list (IBM credentials live in ~/.qiskit, never here)
+config/accounts.toml
+.env
+.env.*
+qiskit-ibm.json
+
+# Dry-run outputs (regenerate with `qdrift dryrun-campaign`)
+data/dry-run/
+results/dry-run/
+
+# LaTeX build files
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.pdf

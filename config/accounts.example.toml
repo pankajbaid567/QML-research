@@ -1,0 +1,18 @@
+# Copy to config/accounts.toml (git-ignored). List ONLY accounts you may use for this
+# study. The budget meter refuses every job from an account that is not listed here.
+#
+# Save the API key once, outside the repo (it goes to ~/.qiskit/qiskit-ibm.json):
+#   uv run python -c "from qiskit_ibm_runtime import QiskitRuntimeService as S; \
+#     S.save_account(channel='ibm_quantum_platform', token=input('API key: '), \
+#     instance=input('Instance CRN or name: '), name='qdrift-main')"
+
+[accounts.main]
+saved_account = "qdrift-main"
+limit_s = 600                       # Open Plan: 10 minutes per rolling 28 days
+phases = ["pilot", "campaign", "rerun", "addon"]
+
+# Add-on time from a legitimate source only, for example a Classroom account:
+# [accounts.classroom]
+# saved_account = "qdrift-classroom"
+# limit_s = 600
+# phases = ["addon"]

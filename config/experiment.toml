@@ -1,0 +1,79 @@
+# Frozen experiment settings. After the pre-registration tag, any change here is a
+# deviation and must be reported in the paper.
+
+[experiment]
+seed = 20261026
+alpha = 0.1            # conformal miscoverage target (90% coverage)
+aci_gamma = 0.03       # adaptive conformal inference step size
+bootstrap = 2000       # bootstrap resamples for confidence intervals
+
+[data]
+datasets = ["two_curves", "breast_cancer"]
+n_train = 240
+n_val = 100
+n_cal_pool = 32        # labelled hardware samples per dataset per session
+n_test = 150           # identical hardware test set every session
+
+[data.two_curves]      # Bowles, Ahmed & Schuld (2024) generator
+degree = 5
+offset = 0.1
+noise = 0.01
+
+[models]
+n_qubits = 4
+m1_layers = 3          # data re-uploading classifier (trained)
+m1_steps = 200
+m1_lr = 0.05
+m1_restarts = 3
+m2_layers = 1          # projected X/Y/Z features of a fixed feature map (chosen on validation accuracy,
+                       # scripts/select_fixed_maps.py: 1 layer 0.81/0.93 vs 2 layers 0.67/0.94)
+m3_layers = 2          # quantum extreme learning machine (fixed random circuit)
+m3_seed = 7
+head_Cs = [0.01, 0.1, 1.0, 10.0, 100.0]
+refit_lambda_per_sample = 0.25   # R2 penalty toward the simulator head = 0.25 * k (chosen on dry-run
+                                 # data only, scripts/select_refit_lambda.py; fixed 1.0 overfit at k = 32)
+refit_k = [8, 16, 32]
+noise_aware_shots = 2000
+
+[hardware]
+shots = 500
+readout_cal_shots = 2000
+max_patches = 14
+patch_buffer = 1       # idle qubits kept between patches
+max_readout_error = 0.1
+max_twoq_error = 0.05
+optimization_level = 1
+seed_transpiler = 11
+emulator_shots = 2000                    # shots for the calibration-emulator prediction (no QPU)
+sessions_per_device = 5
+devices = ["ibm_fez", "ibm_kingston"]    # Heron r2; ibm_marrakesh was in maintenance (2,020 queued
+fallback_devices = ["ibm_marrakesh"]     # jobs) on 26 Oct 2026, so it became the fallback
+per_execution_s = 0.000265               # ibm_fez pilot: (11 s - 2 s overhead) / 34,000 executions
+job_overhead_s = 2.0
+max_execution_time_s = 120               # per-job hard stop requested from IBM Runtime
+
+[pilot]
+dataset = "two_curves"
+models = ["M1", "M3"]  # Z-basis models; packed vs isolated on the same samples
+rows = 2               # packed rows per model, so samples = rows x patches
+
+[dryrun]               # local rehearsal on fake backends with synthetic day-to-day drift
+devices = ["fake_fez", "fake_marrakesh"]
+sessions_per_device = 5
+readout_drift_mean = 0.01
+readout_drift_sd = 0.006
+twoq_drift_mean = 0.004
+twoq_drift_sd = 0.003
+reported_fraction = 0.5   # share of the injected drift that the snapshot and emulator "see"
+
+[budget]
+global_cap_s = 1200    # hard stop across every account: 20 minutes
+window_days = 28
+account_fraction = 0.9 # never use more than 90% of an account's 28-day limit
+safety_factor = 1.25
+
+[budget.phase_caps]
+pilot = 90
+campaign = 400
+rerun = 110
+addon = 600
