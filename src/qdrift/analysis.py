@@ -71,7 +71,10 @@ def patch_covariates(snap, patches) -> list[dict]:
     q = {r["q"]: r for r in snap["qubits"]}
     err = {frozenset((e["a"], e["b"])): e["error"] for e in snap["edges"]}
     try:
-        age = (datetime.fromisoformat(snap["captured_utc"]) - datetime.fromisoformat(snap["last_update"])).total_seconds() / 3600
+        # Age of the calibration when the job ran. Run-time snapshots carry `properties_at`
+        # (the job start); their `captured_utc` is only when the snapshot was fetched.
+        ref = snap.get("properties_at") or snap["captured_utc"]
+        age = (datetime.fromisoformat(ref) - datetime.fromisoformat(snap["last_update"])).total_seconds() / 3600
     except Exception:
         age = np.nan
 
