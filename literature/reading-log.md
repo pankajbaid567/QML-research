@@ -137,15 +137,6 @@ One entry per paper in refs.bib. Status: unread, skimmed or read.
 - Limitations: 
 - Relevance (RQ1-RQ4): 
 
-## moradi2022kernelmitigation
-- Status: unread
-- Question: 
-- Method: 
-- Hardware and budget: 
-- Key results: 
-- Limitations: 
-- Relevance (RQ1-RQ4): 
-
 ## liao2024mlqem
 - Status: unread
 - Question: 
@@ -317,7 +308,7 @@ One entry per paper in refs.bib. Status: unread, skimmed or read.
 - Limitations: 
 - Relevance (RQ1-RQ4): 
 
-## baig2026nids
+## gillani2026nids
 - Status: unread
 - Question: 
 - Method: 
