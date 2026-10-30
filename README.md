@@ -32,8 +32,21 @@ cp config/accounts.example.toml config/accounts.toml   # git-ignored list of app
 | `uv run qdrift estimate --device ibm_fez` | none: predicted usage of a pilot and a session |
 | `uv run qdrift pilot --device ibm_fez` | yes, about 20 s; asks you to type RUN |
 | `uv run qdrift session --device ibm_fez` | yes, about 30 s; asks you to type RUN |
-| `uv run qdrift budget status` / `reconcile` | none |
+| `uv run qdrift fetch` | none: saves jobs that finished after you stopped waiting |
+| `uv run qdrift budget status` / `reconcile` / `audit` | none |
 | `uv run qdrift analyze` / `validate` | none |
+| `uv run qdrift paper --build` | none: tables, numbers and figures into `paper/generated/`, PDF via tectonic |
+
+## Paper and literature
+
+- `paper/main.tex` and `paper/sections/*.tex`: IEEE two-column skeleton. Comments in each
+  section list what to cover and which papers to cite; you write the prose. Results are
+  referenced with `\val{key}` from `paper/generated/numbers.tex`, never typed by hand.
+- `uv run python scripts/check_paper.py --overlap`: citation, label, TODO and page checks, plus
+  8-word overlap with the downloaded papers. `--draft file.txt` checks a single paragraph.
+- `uv run python scripts/fetch_papers.py`: downloads open copies of `literature/refs.bib`
+  into `literature/pdfs/` (git-ignored) and writes `literature/papers.csv` with links.
+- `uv run python scripts/check_reading_log.py`: open items in `literature/reading-log.md`.
 
 Add `--dry-run` and a `fake_*` device (for example `fake_fez`) to rehearse any command.
 
@@ -60,6 +73,6 @@ preregistration.md hypotheses and decision rules (tagged before the campaign)
 
 ## Status
 
-Simulation, packing, emulation, budget meter, analysis and the fake-backend rehearsal are
-implemented and tested (18 tests). Layouts for ibm_fez and ibm_marrakesh are frozen. No QPU
-time has been used. Next: the pilot, then the tagged pre-registration and the campaign.
+Pre-registered on 26-27 Oct 2026 (tag `prereg-v1`). Pilots done on ibm_fez and ibm_kingston.
+Campaign: session 1 done on both devices (27 Oct); four more per device to go. Changes after
+the tag are listed in `notes/deviations.md`. The paper skeleton builds (`paper/build/main.pdf`).

@@ -52,11 +52,22 @@ First look (fez s1, descriptive only, no design changes): hardware R0 accuracy i
 below simulator; measured readout mitigation (R3m) recovers 2-5 points; split conformal
 calibrated on the simulator under-covers (0.69-0.91), ACI stays near 0.90.
 
+## Paper (Task 11), 30 Oct 2026
+- paper/ skeleton (IEEEtran conference) with guidance comments per section; numbers via
+  \val{key}; `uv run qdrift paper --build` regenerates 7 tables, 6 figures, 134 numbers and the
+  IEEE-formatted bibliography, then builds paper/build/main.pdf with tectonic (5 pages, no prose).
+- scripts/check_paper.py: citations, labels, \val keys, TODOs, page count; `--overlap` marks
+  8-word runs shared with the 38 downloaded papers (verified on a copied QuantumNAT sentence).
+- Observation for Limitations: IBM refreshes reported properties often, so "calibration age"
+  at job start is only 0.2-0.4 h on all runs so far.
+- Preliminary (2 sessions): emulator over hardware +7.4 points [4.4, 10.5]; R3m best repair
+  (+1.5 points); R1 normalisation hurts (-0.9 points). Not final; no design change.
+
 ## Next (needs the user)
 1. Optional: push the repo and tag to GitHub for a public, verifiable pre-registration date.
-2. `uv run qdrift noise-aware --device ibm_fez` and `--device ibm_kingston` (no QPU).
-3. Campaign: `uv run qdrift session --device ibm_fez` and `--device ibm_kingston`, one per
-   device per day, 5 each over 10-14 days; `uv run qdrift fetch` later the same day.
+2. Campaign: `uv run qdrift session --device ibm_fez` and `--device ibm_kingston` on the
+   mornings of 31 Oct, 2, 4 and 6 Nov; `uv run qdrift fetch` later the same day.
+3. Reading log (must-read list first), then draft Introduction, Related Work and Methods.
 3. Commit and tag the pre-registration (ask the user first).
 4. `uv run qdrift noise-aware --device <name>` right before session 1, then 5 sessions per
    device over 10-14 days.

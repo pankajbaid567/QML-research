@@ -1,0 +1,17 @@
+\begin{table}[t]
+\centering
+\caption{Conformal prediction on hardware (target coverage 0.90): mean coverage over all sessions and over sessions 2 onward, worst case, mean set size and extra QPU seconds.}
+\label{tab:coverage}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrrrr}
+\toprule
+Method & Cov. & Cov.\ $s\geq2$ & Min & Size & QPU (s) \\
+\midrule
+CP$_{\mathrm{sim}}$ & 0.822 & -- & 0.693 & 1.07 & 0.00 \\
+CP$_{\mathrm{s1}}$ & 0.929 & -- & 0.887 & 1.43 & 0.50 \\
+CP$_{\mathrm{same}}$ & 0.929 & -- & 0.887 & 1.43 & 0.50 \\
+ACI & 0.891 & -- & 0.880 & 1.30 & 0.00 \\
+\bottomrule
+\end{tabular}
+\end{table}

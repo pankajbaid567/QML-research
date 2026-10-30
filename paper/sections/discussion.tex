@@ -1,0 +1,17 @@
+% ===================================================================== DISCUSSION
+% Target: about 0.8 column. What the results mean for someone deploying a QML model under a
+% small budget: which repair to use, how far to trust an emulator, how often to recalibrate.
+% Compare with QuantumNAT, AQCP and the QAOA drift study \cite{wang2022quantumnat,
+% spencer2026aqcp,qaoa2026drift}. Then a "Limitations" paragraph, honestly:
+%  - Open Plan: no control over when a job runs (queues up to \val{queue-max-h} h), one job
+%    per session, \val{sessions-done} sessions in total.
+%  - Small models (\val{n-qubits} qubits), two datasets, \val{n-test} test samples per session.
+%  - Patches frozen from one day's calibration; the emulator ignores crosstalk; the pilot
+%    crosstalk test used only 28 samples per device.
+%  - IBM's reported calibration is refreshed often, so "calibration age" is short (minutes to
+%    hours) and only partly measures drift.
+%  - Twirling and dynamical decoupling were off by design, so the results describe raw noise.
+%  - Any deviation from the pre-registration (notes/deviations.md).
+\section{Discussion}
+\label{sec:discussion}
+\todo{Discussion and limitations.}

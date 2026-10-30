@@ -1,7 +1,9 @@
 # Changes after the pre-registration (tag `prereg-v1`, commit 154984c)
 
-Every change made after the tag is listed here and reported in the paper. "Design" changes
-alter what was pre-registered; "fix" and "admin" entries do not.
+Every change after the tag that touches the design, the data, the analysis or the references
+is listed here and reported in the paper. "Design" changes alter what was pre-registered;
+"fix" and "admin" entries do not. New tooling that leaves results unchanged (paper assets,
+checks, PDF copies of figures) is in the git history only.
 
 | Date | Change | Type | Effect on the pre-registered design |
 | --- | --- | --- | --- |

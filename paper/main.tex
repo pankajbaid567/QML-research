@@ -1,0 +1,71 @@
+% IEEE two-column conference paper. Build: `uv run qdrift paper --build` (tectonic) or upload
+% the whole paper/ folder to Overleaf. Numbers come from generated/numbers.tex through \val{key};
+% tables and figures come from generated/. Never type a result by hand.
+%
+% WRITING RULES (similarity check < 15%):
+%  - Write every sentence yourself. Do not paste from papers, the reading log or AI tools.
+%  - Quote rarely, one short sentence at most, in quotation marks, with \cite.
+%  - Delete the guidance comments (%) before submission and run scripts/check_paper.py.
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage[T1]{fontenc}
+\usepackage{cite}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{generated/figures/}}
+
+\input{generated/numbers}
+\DeclareRobustCommand{\val}[1]{\ifcsname qd@#1\endcsname\csname qd@#1\endcsname\else\textbf{??#1}\fi}
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+
+\begin{document}
+
+% Working title; change it once the results are in.
+\title{Noise Drift of Simulator-Trained Quantum Classifiers on IBM Heron Processors:
+A Pre-Registered Multi-Day Study of Low-Cost Repairs}
+
+\author{\IEEEauthorblockN{Pankaj Baid}
+\IEEEauthorblockA{\todo{department}, Rishihood University\\
+\todo{city}, India\\
+pankaj.baid2024@nst.rishihood.edu.in}}
+
+\maketitle
+
+% ABSTRACT: 150-200 words, written last. One or two sentences each: problem; gap (multi-day,
+% multi-device, classifiers, budget-limited); what you did (\val{sessions-done} sessions on
+% \val{devices}, three models, two datasets, pre-registered); the 2-3 main numbers (gap,
+% emulator error, best repair per QPU-second, coverage); one-line takeaway. No citations.
+\begin{abstract}
+\todo{Write the abstract last.}
+\end{abstract}
+
+\begin{IEEEkeywords}
+quantum machine learning, noise drift, error mitigation, conformal prediction, NISQ benchmarking
+\end{IEEEkeywords}
+
+\input{sections/introduction}
+\input{sections/related-work}
+\input{sections/methods}
+\input{sections/results}
+\input{sections/discussion}
+\input{sections/conclusion}
+
+\section*{Data and code availability}
+% Fill at release: repository URL, Zenodo DOI of the dataset, the prereg-v1 tag and its date.
+\todo{repository URL, dataset DOI, pre-registration tag and date.}
+
+\section*{Acknowledgment}
+% IBM's requested wording for work that used IBM Quantum services; keep it as is.
+We acknowledge the use of IBM Quantum services for this work. The views expressed are those of
+the authors, and do not reflect the official policy or position of IBM or the IBM Quantum team.
+
+% Drafting only: lists every reference so the bibliography renders before anything is cited.
+% Remove this line before submission (scripts/check_paper.py reports it).
+\nocite{*}
+\bibliographystyle{IEEEtran}
+\bibliography{generated/refs}
+
+\end{document}

@@ -306,6 +306,7 @@ def figures(t: dict, out: Path, alpha: float) -> list[Path]:
         p = out / name
         fig.tight_layout()
         fig.savefig(p, dpi=200)
+        fig.savefig(p.with_suffix(".pdf"))   # vector copy for the paper
         plt.close(fig)
         paths.append(p)
 

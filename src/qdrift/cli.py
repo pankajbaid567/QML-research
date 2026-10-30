@@ -175,6 +175,11 @@ def cmd_analyze(cfg, a):
     analyze(cfg, _proc(cfg))
 
 
+def cmd_paper(cfg, a):
+    from .paper import build
+    build(cfg, _proc(cfg), compile_pdf=a.build)
+
+
 def cmd_validate(cfg, a):
     from .analysis import devices_for
     from .session import session_dirs, validate_session
@@ -212,6 +217,8 @@ def main(argv=None):
             p.add_argument("--phase", default="campaign", choices=["campaign", "rerun", "addon"])
     sub.add_parser("dryrun-campaign", help="full rehearsal on fake backends")
     sub.add_parser("analyze", help="tables, hypotheses and figures")
+    sub.add_parser("paper", help="LaTeX numbers, tables, figures and bibliography for paper/").add_argument(
+        "--build", action="store_true", help="also compile paper/build/main.pdf with tectonic")
     sub.add_parser("validate", help="schema checks for every saved session")
     a = ap.parse_args(argv)
     dry = a.dry_run or a.cmd == "dryrun-campaign"
@@ -223,7 +230,7 @@ def main(argv=None):
     handlers = {"prepare": cmd_prepare, "budget": cmd_budget, "backends": cmd_backends, "layout": cmd_layout,
                 "noise-aware": cmd_noise_aware, "estimate": cmd_estimate, "pilot": cmd_pilot, "fetch": cmd_fetch,
                 "session": cmd_session, "dryrun-campaign": cmd_dryrun_campaign, "analyze": cmd_analyze,
-                "validate": cmd_validate}
+                "paper": cmd_paper, "validate": cmd_validate}
     handlers[a.cmd](cfg, a)
 
 

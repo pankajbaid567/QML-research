@@ -23,6 +23,9 @@ results/dry-run/
 # Downloaded papers: personal reading copies, not for redistribution
 literature/pdfs/
 
+# Paper build output (rebuild with `uv run qdrift paper --build`)
+paper/build/
+
 # LaTeX build files
 paper/*.aux
 paper/*.bbl

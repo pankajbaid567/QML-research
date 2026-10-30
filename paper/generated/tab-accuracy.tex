@@ -1,0 +1,19 @@
+\begin{table*}[t]
+\centering
+\caption{Test accuracy by method, averaged over sessions and devices. SIM: noiseless simulator; EMU: calibration emulator; R0: hardware without repair; bold: best repair per row. Preliminary: 2 of 10 sessions.}
+\label{tab:accuracy}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{llccccccccc}
+\toprule
+Dataset & Model & SIM & EMU & R0 & R1 & R2$_{16}$ & R2$_{16}^{\mathrm{s1}}$ & R3$_{\mathrm{m}}$ & R3$_{\mathrm{r}}$ & R4 \\
+\midrule
+Breast cancer & M1 & 0.967 & 0.963 & 0.887 & 0.893 & 0.887 & 0.887 & 0.897 & \textbf{0.907} & 0.890 \\
+Breast cancer & M2 & 0.933 & 0.907 & 0.893 & 0.893 & 0.897 & 0.897 & 0.897 & \textbf{0.907} & 0.897 \\
+Breast cancer & M3 & 0.913 & 0.883 & 0.837 & 0.807 & 0.830 & 0.830 & \textbf{0.860} & 0.843 & 0.827 \\
+Two curves & M1 & 0.927 & 0.917 & 0.813 & 0.800 & 0.803 & 0.803 & \textbf{0.827} & 0.810 & 0.817 \\
+Two curves & M2 & 0.873 & 0.760 & 0.707 & 0.663 & 0.727 & 0.727 & 0.727 & 0.673 & \textbf{0.750} \\
+Two curves & M3 & 0.847 & 0.797 & 0.647 & 0.670 & 0.663 & 0.663 & 0.667 & 0.663 & \textbf{0.683} \\
+\bottomrule
+\end{tabular}
+\end{table*}

@@ -1,0 +1,20 @@
+\begin{table}[t]
+\centering
+\caption{Noiseless simulator test accuracy of the quantum models and tuned classical baselines (150 test samples; 95\% bootstrap interval).}
+\label{tab:sim}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lcc}
+\toprule
+Model & Two curves & Breast cancer \\
+\midrule
+M1 re-uploading & 0.927 [0.880, 0.967] & 0.967 [0.933, 0.993] \\
+M2 projected & 0.873 [0.820, 0.927] & 0.933 [0.893, 0.973] \\
+M3 QELM & 0.847 [0.787, 0.900] & 0.913 [0.867, 0.960] \\
+\midrule\multicolumn{3}{l}{\emph{Tuned classical baselines, same inputs}} \\
+Logistic regression & 0.733 [0.660, 0.800] & 0.940 [0.900, 0.973] \\
+RBF-SVM & 0.987 [0.967, 1.000] & 0.940 [0.900, 0.973] \\
+MLP & 0.973 [0.947, 0.993] & 0.960 [0.927, 0.987] \\
+\bottomrule
+\end{tabular}
+\end{table}

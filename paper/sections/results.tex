@@ -1,0 +1,85 @@
+% ===================================================================== RESULTS
+% Target: about 2 columns. One subsection per research question. Report what the tables and
+% figures show with \val{} numbers, then the pre-registered decision. Interpretation goes to
+% the Discussion. Results stay preliminary until all \val{sessions-planned} sessions are in.
+\section{Results}
+\label{sec:results}
+
+% Simulator accuracy and classical baselines first (Table~\ref{tab:sim}): the quantum models do
+% not beat the tuned baselines, which the paper states plainly.
+\todo{Simulator results and baselines (Table~\ref{tab:sim}).}
+
+% RQ1: hardware vs simulator vs emulator. Mean gap \val{gap-mean-pp} points (range
+% \val{gap-min-pp} to \val{gap-max-pp}); H1 statistic \val{h1-mean} [\val{h1-lo}, \val{h1-hi}],
+% decision: \val{h1-decision}. Fig.~\ref{fig:sim-emu-hw}, Fig.~\ref{fig:emu-vs-hw},
+% Table~\ref{tab:accuracy}.
+\subsection{Simulator, emulator and hardware (RQ1)}
+\todo{RQ1.}
+
+% RQ2: drift across sessions and devices (Fig.~\ref{fig:drift}); H2 ratio \val{h2-mean}
+% [\val{h2-lo}, \val{h2-hi}] -> \val{h2-decision}; calibration predictors (H4) from
+% results/regression.csv: \val{h4-decision}.
+\subsection{Drift across sessions and devices (RQ2)}
+\todo{RQ2.}
+
+% RQ3: noise model F_hw = gamma F_sim + beta (Fig.~\ref{fig:noise-model}): typical gamma, beta,
+% R^2 and how stable they are across sessions (results/noise_fits.csv).
+\subsection{Noise model on Heron (RQ3)}
+\todo{RQ3.}
+
+% RQ4: repairs per QPU second (Table~\ref{tab:repairs}, Fig.~\ref{fig:repair-cost}); H3
+% \val{h3-mean} [\val{h3-lo}, \val{h3-hi}] -> \val{h3-decision}; coverage (Table~\ref{tab:coverage},
+% Fig.~\ref{fig:coverage}) and H5 -> \val{h5-decision}. Close with Table~\ref{tab:hypotheses}.
+\subsection{Repairs and their cost (RQ4)}
+\todo{RQ4.}
+
+\input{generated/tab-accuracy}
+\input{generated/tab-repairs}
+\input{generated/tab-coverage}
+\input{generated/tab-hypotheses}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.75\textwidth]{fig1_sim_emulator_hardware.pdf}
+\caption{Test accuracy in the noiseless simulator, the calibration emulator and on hardware
+(mean and standard deviation over sessions and devices).}
+\label{fig:sim-emu-hw}
+\end{figure*}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.9\columnwidth]{fig3_emulator_vs_hardware.pdf}
+\caption{Emulator-predicted accuracy against hardware accuracy; each point is one session,
+dataset and model. The dashed line marks equality.}
+\label{fig:emu-vs-hw}
+\end{figure}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig2_drift.pdf}
+\caption{Hardware test accuracy across sessions for each dataset and model, without repair (R0)
+and with repairs; solid and dashed lines are the two devices.}
+\label{fig:drift}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{fig4_noise_model.pdf}
+\caption{Scale $\gamma$ and shift $\beta$ of the linear map from simulator to hardware features,
+averaged over features, per session.}
+\label{fig:noise-model}
+\end{figure*}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.9\columnwidth]{fig5_repair_cost.pdf}
+\caption{Mean accuracy gain of each repair over R0 against the extra QPU seconds it needs per session.}
+\label{fig:repair-cost}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.9\columnwidth]{fig6_coverage.pdf}
+\caption{Conformal coverage per session; the dashed line is the target \val{coverage-target}.}
+\label{fig:coverage}
+\end{figure}

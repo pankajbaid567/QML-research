@@ -1,0 +1,72 @@
+% ===================================================================== METHODS
+% Target: about 1.5 columns. Describe what was done so another student could repeat it.
+% Every number below is a \val{} macro; keep using them instead of typing digits.
+\section{Methods}
+\label{sec:methods}
+
+% --- A. Data. two_curves from the benchmark suite of \cite{bowles2024benchmarking};
+% breast_cancer (UCI) reduced to \val{n-qubits} features with PCA fitted on the training split.
+% Features scaled to [0, pi] using training-split ranges. Fixed stratified splits:
+% train \val{n-train}, validation \val{n-val}, labelled hardware calibration pool \val{n-cal},
+% hardware test set \val{n-test} (the same samples in every session). Seed \val{seed}.
+\subsection{Datasets}
+\todo{Datasets and splits.}
+
+% --- B. Models. Three circuits on \val{n-qubits} qubits, each followed by a logistic head on
+% Pauli expectation features (state the feature count for each):
+%  M1 data re-uploading \cite{perezsalinas2020reuploading}: \val{m1-layers} layers of RY(x),
+%     trainable RZ RY per qubit and a CZ chain, plus a final RY layer; \val{m1-params}
+%     parameters trained jointly with the head (Adam, exact parameter shift, \val{m1-steps} steps,
+%     \val{m1-restarts} restarts); features <Z_q> (\val{m1-features}).
+%  M2 projected features \cite{huang2021power}: \val{m2-layers} fixed layer of RY(x) RZ(x) and a
+%     CZ chain; features <X_q>,<Y_q>,<Z_q> (\val{m2-features}), three measurement circuits.
+%  M3 quantum extreme learning machine: data layer, \val{m3-layers} fixed random layers;
+%     features <Z_q> and <Z_q Z_r> (\val{m3-features}).
+%  Head: p(y=1|x) = sigma(w^T phi(x) + b) on standardised features, C chosen by 5-fold CV.
+%  Useful equation:
+%   p(y=1\mid x) = \sigma\!\left(w^\top \tfrac{\phi(x)-\mu}{s} + b\right),\quad
+%   \phi_j(x) = \langle P_j \rangle_{\rho(x)}
+%  Say that M2/M3 depth was chosen on validation accuracy before any hardware run.
+\subsection{Models}
+\todo{Models M1--M3 and the classical head.}
+
+% --- C. Hardware protocol. Heron r2 devices \val{devices} (fallback \val{fallback}); Open Plan,
+% one Sampler job per session, \val{shots} shots per circuit, \val{readout-shots} shots for the
+% two readout-calibration circuits; twirling and dynamical decoupling off (raw noise).
+% Packing: \val{patches} disjoint linear \val{n-qubits}-qubit patches with \val{patch-buffer}
+% idle qubit between them, chosen once from calibration data and frozen; hardware sample i runs
+% on patch i mod \val{patches} in every session. Cite \cite{parallelqml2024,ohkura2022simultaneous}.
+% Pilot: packed vs isolated (Table~\ref{tab:pilot}); measured cost \val{per-execution-us}~$\mu$s
+% per execution. Sessions: \val{sessions-per-device} per device over 10-14 days (Table~\ref{tab:protocol}).
+% Budget: hard cap \val{budget-cap}~s across accounts; campaign cap \val{campaign-cap}~s;
+% \val{qpu-used}~s used so far. Calibration snapshots saved at submission and at job start.
+\subsection{Hardware protocol}
+\todo{Devices, packing, pilot, sessions and budget.}
+
+% --- D. Emulator and repairs. EMU: AerSimulator.from_backend with the calibration available
+% at submission (\val{emulator-shots} shots). Repairs, all computed offline from the same counts:
+%  R1 batch normalisation of features \cite{wang2022quantumnat};
+%  R2_k head refit on k = 8, 16, 32 labelled hardware samples, penalised toward the simulator
+%     head with strength \val{refit-lambda} k; R2_16^s1 reuses session 1 labels;
+%  R3 tensored readout mitigation with measured (R3m) or reported (R3r) error rates \cite{nation2021m3};
+%  R4 head trained on emulated noisy training features (\val{noise-aware-shots} shots);
+%  extra QPU seconds counted for each repair.
+\subsection{Emulator and repairs}
+\todo{Emulator and repairs R1--R4.}
+
+% --- E. Uncertainty. Split conformal with score 1 - p(true label) calibrated on the simulator
+% (CP_sim), on session 1 (CP_s1) or on the same session (CP_same) \cite{park2023qcp}; adaptive
+% conformal inference with step \val{aci-gamma} over the session stream \cite{gibbs2021aci,
+% spencer2026aqcp}; target coverage \val{coverage-target}. Calibration error ECE \cite{guo2017calibration}.
+\subsection{Uncertainty quantification}
+\todo{Conformal prediction and calibration metrics.}
+
+% --- F. Statistics and pre-registration. Hypotheses H1-H5 and decision rules fixed in
+% preregistration.md and tagged prereg-v1 before session 1; \val{bootstrap} bootstrap
+% resamples; OLS with HC3 errors for H4; list deviations (notes/deviations.md).
+\subsection{Statistics and pre-registration}
+\todo{Hypotheses, tests and deviations.}
+
+\input{generated/tab-sim}
+\input{generated/tab-protocol}
+\input{generated/tab-pilot}
