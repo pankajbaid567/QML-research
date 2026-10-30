@@ -13,9 +13,15 @@ config/accounts.toml
 .env.*
 qiskit-ibm.json
 
+# Jobs submitted but not fetched yet (moved into data/raw/<device>/ by `qdrift fetch`)
+data/raw/pending/
+
 # Dry-run outputs (regenerate with `qdrift dryrun-campaign`)
 data/dry-run/
 results/dry-run/
+
+# Downloaded papers: personal reading copies, not for redistribution
+literature/pdfs/
 
 # LaTeX build files
 paper/*.aux

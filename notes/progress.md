@@ -36,8 +36,24 @@
 - Kingston pilot done (queued ~4.8 h): 11 s, 0.000265 s/execution, no detectable crosstalk.
   Ledger after pilots: 22.0 s used, 0 pending. Pilot section of preregistration.md filled.
 
+- Pre-registration frozen: commit 154984c, annotated tag `prereg-v1` (local only, not pushed).
+  config_sha256 3a56fede...95f2. Any later config change is a reported deviation.
+
+## Campaign log
+| Day | Device | Session | Job | Queue wait | Usage | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| 27 Oct | ibm_fez | 1 | dbg1nvdrd2mc73ctp640 | 2.2 min | 20 s | saved, valid |
+| 27 Oct | ibm_kingston | 1 | dbg1oudrd2mc73ctp8qg | 1.9 h | 21 s | saved 30 Oct, valid |
+
+Ledger after day 1: 63.0 s used (pilots 22 s, campaign 41 s), 0 pending.
+Planned next sessions (mornings IST, both devices): 31 Oct, 2 Nov, 4 Nov, 6 Nov; deadline 10 Nov.
+
+First look (fez s1, descriptive only, no design changes): hardware R0 accuracy is 4-19 points
+below simulator; measured readout mitigation (R3m) recovers 2-5 points; split conformal
+calibrated on the simulator under-covers (0.69-0.91), ACI stays near 0.90.
+
 ## Next (needs the user)
-1. Permission to commit everything and tag `prereg-v1` (freezes config, layouts, hypotheses).
+1. Optional: push the repo and tag to GitHub for a public, verifiable pre-registration date.
 2. `uv run qdrift noise-aware --device ibm_fez` and `--device ibm_kingston` (no QPU).
 3. Campaign: `uv run qdrift session --device ibm_fez` and `--device ibm_kingston`, one per
    device per day, 5 each over 10-14 days; `uv run qdrift fetch` later the same day.
