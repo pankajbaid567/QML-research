@@ -44,9 +44,14 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | 27 Oct | ibm_fez | 1 | dbg1nvdrd2mc73ctp640 | 2.2 min | 20 s | saved, valid |
 | 27 Oct | ibm_kingston | 1 | dbg1oudrd2mc73ctp8qg | 1.9 h | 21 s | saved 30 Oct, valid |
+| 30 Oct | ibm_fez | 2 | dbidpilep8hs73anl640 | 0.3 h | 20 s | ran 18:24 UTC, valid |
+| 30 Oct | ibm_kingston | 2 | dbidqso1h92s73838kc0 | 0.2 h | 21 s | ran 18:23 UTC, valid |
 
-Ledger after day 1: 63.0 s used (pilots 22 s, campaign 41 s), 0 pending.
-Planned next sessions (mornings IST, both devices): 31 Oct, 2 Nov, 4 Nov, 6 Nov; deadline 10 Nov.
+Ledger after day 2: 104.0 s used (pilots 22 s, campaign 82 s), 0 pending. All four sessions
+match the tagged config hash; run-path code is unchanged between prereg-v1 and 8ebe0ed; the
+tag (27 Oct 03:25 UTC) precedes session 1 (03:35 UTC).
+Session 2 ran in the evening (deviation logged). Sessions 3-5: about 09:00 IST on 2, 5 and
+8 Nov, both devices; the window ends 10 Nov.
 
 First look (fez s1, descriptive only, no design changes): hardware R0 accuracy is 4-19 points
 below simulator; measured readout mitigation (R3m) recovers 2-5 points; split conformal
@@ -63,11 +68,23 @@ calibrated on the simulator under-covers (0.69-0.91), ACI stays near 0.90.
 - Preliminary (2 sessions): emulator over hardware +7.4 points [4.4, 10.5]; R3m best repair
   (+1.5 points); R1 normalisation hurts (-0.9 points). Not final; no design change.
 
-## Next (needs the user)
-1. Optional: push the repo and tag to GitHub for a public, verifiable pre-registration date.
-2. Campaign: `uv run qdrift session --device ibm_fez` and `--device ibm_kingston` on the
-   mornings of 31 Oct, 2, 4 and 6 Nov; `uv run qdrift fetch` later the same day.
-3. Reading log (must-read list first), then draft Introduction, Related Work and Methods.
+## Paper drafts, 31 Oct 2026
+- At the user's request the assistant drafted Introduction, Related Work, Methods and the
+  design-based Discussion paragraphs (limitations, deviations). Each file is marked as an AI
+  draft; an AI-use sentence is in the Acknowledgment (IEEE requires disclosure).
+- Claims about cited papers were checked against their abstracts or text.
+- Preliminary after 4 sessions (not final): H1 supported (EMU - R0 +7.4 points), H2 supported
+  (variance ratio 3.3), H3 not supported, H4 largest term is CZ error, H5 not supported
+  (CP_s1 over-covers at 0.93 instead of under-covering).
+
+## Next
+1. User: sessions 3-5 on both devices at about 09:00 IST on 2, 5 and 8 Nov; `uv run qdrift
+   fetch` later the same day.
+2. User: revise the AI drafts in their own words; reading log.
+3. Assistant, after session 5: final analysis, then Results, the interpretation part of the
+   Discussion, Abstract and Conclusion; cut to 8 pages (drop Fig. 1, Fig. 4 to a sentence,
+   pilot table to text).
+4. Optional: push the repo and tag to GitHub for a public, verifiable pre-registration date.
 3. Commit and tag the pre-registration (ask the user first).
 4. `uv run qdrift noise-aware --device <name>` right before session 1, then 5 sessions per
    device over 10-14 days.
