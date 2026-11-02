@@ -27,9 +27,10 @@
 \title{Noise Drift of Simulator-Trained Quantum Classifiers on IBM Heron Processors:
 A Pre-Registered Multi-Day Study of Low-Cost Repairs}
 
+% Affiliation inferred from the e-mail domain (nst.rishihood.edu.in); confirm it.
 \author{\IEEEauthorblockN{Pankaj Baid}
-\IEEEauthorblockA{\todo{department}, Rishihood University\\
-\todo{city}, India\\
+\IEEEauthorblockA{Newton School of Technology, Rishihood University\\
+Sonipat, Haryana, India\\
 pankaj.baid2024@nst.rishihood.edu.in}}
 
 \maketitle
@@ -54,17 +55,20 @@ quantum machine learning, noise drift, error mitigation, conformal prediction, N
 \input{sections/conclusion}
 
 \section*{Data and code availability}
-% Fill at release: repository URL, Zenodo DOI of the dataset, the prereg-v1 tag and its date.
-\todo{repository URL, dataset DOI, pre-registration tag and date.}
+% Fill the URL and the DOI at release (Task 12).
+The code, frozen models, raw counts and calibration snapshots are available at
+\todo{repository URL} and archived as \todo{Zenodo DOI}. The registration is the git tag
+\texttt{prereg-v1} (commit \texttt{\val{prereg-commit}}, \val{prereg-date}).
 
 \section*{Acknowledgment}
 % IBM's requested wording for work that used IBM Quantum services; keep it as is.
 We acknowledge the use of IBM Quantum services for this work. The views expressed are those of
 the authors, and do not reflect the official policy or position of IBM or the IBM Quantum team.
+% IEEE requires AI-generated content (text, code, figures) to be disclosed here. Keep this
+% sentence accurate: edit it if you rewrite the drafts, and check your course's AI policy.
+The analysis software and first drafts of parts of this manuscript were prepared with the help
+of an AI assistant (Kiro); the author reviewed, revised and verified all code, text and results.
 
-% Drafting only: lists every reference so the bibliography renders before anything is cited.
-% Remove this line before submission (scripts/check_paper.py reports it).
-\nocite{*}
 \bibliographystyle{IEEEtran}
 \bibliography{generated/refs}
 

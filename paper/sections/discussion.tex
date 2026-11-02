@@ -1,17 +1,34 @@
-% ===================================================================== DISCUSSION
-% Target: about 0.8 column. What the results mean for someone deploying a QML model under a
-% small budget: which repair to use, how far to trust an emulator, how often to recalibrate.
-% Compare with QuantumNAT, AQCP and the QAOA drift study \cite{wang2022quantumnat,
-% spencer2026aqcp,qaoa2026drift}. Then a "Limitations" paragraph, honestly:
-%  - Open Plan: no control over when a job runs (queues up to \val{queue-max-h} h), one job
-%    per session, \val{sessions-done} sessions in total.
-%  - Small models (\val{n-qubits} qubits), two datasets, \val{n-test} test samples per session.
-%  - Patches frozen from one day's calibration; the emulator ignores crosstalk; the pilot
-%    crosstalk test used only 28 samples per device.
-%  - IBM's reported calibration is refreshed often, so "calibration age" is short (minutes to
-%    hours) and only partly measures drift.
-%  - Twirling and dynamical decoupling were off by design, so the results describe raw noise.
-%  - Any deviation from the pre-registration (notes/deviations.md).
+% Design-based parts drafted with an AI assistant on 31 Oct 2026; the interpretation is written
+% after the last session. Revise everything in your own words before submission.
 \section{Discussion}
 \label{sec:discussion}
-\todo{Discussion and limitations.}
+
+% Interpretation (after session 5): what the results mean for someone running a small QML model
+% on a free budget: which repair to use, how far to trust a calibration emulator, and how often
+% to recalibrate. Compare with \cite{wang2022quantumnat,spencer2026aqcp,qaoa2026drift}.
+\todo{Interpretation of the results.}
+
+\textbf{Limitations.} On the free plan a job runs when the queue allows, not at a chosen time:
+queue waits reached \val{queue-max-h}~h, and with one job per session the campaign holds
+\val{sessions-done} sessions. The models are small (\val{n-qubits} qubits, at most \val{max-cz}
+CZ gates) and the study covers two datasets with \val{n-test} test inputs per session, so the
+accuracy of a single session is uncertain by several points and only effects pooled over
+sessions are resolved. The qubit chains were chosen from one day's calibration and then kept
+fixed; this pairs the data across sessions but means that later sessions may not use the best
+qubits of that day. The emulator treats each chain on its own and contains no crosstalk, and
+the packing check used \val{pilot-samples} inputs per device, enough to exclude only large
+crosstalk effects. Because IBM refreshes the reported calibration often, its age at job start
+lay between \val{cal-age-min-h} and \val{cal-age-max-h}~h, which makes calibration age a weak
+measure of drift. Finally, twirling and dynamical decoupling were switched off by design, so the
+results describe raw device noise; we did not test the repairs in combination with these
+techniques.
+
+\textbf{Deviations from the registration.} The registration is the git tag \texttt{prereg-v1}
+(\val{prereg-date}). Two changes followed it. Before the hypotheses were first evaluated on
+hardware data, we corrected the analysis code so that calibration age is measured at job start
+instead of at the time the snapshot was downloaded; only the age covariate of H4 is affected.
+Session~2 on both devices ran at about 18:25~UTC, in the evening in India, whereas session~1
+ran in the morning, the slot planned for the remaining sessions; sessions therefore differ in
+time of day as well as date.
+\todo{After session 5: confirm the times of sessions 3--5 and add any further deviation from
+notes/deviations.md.}

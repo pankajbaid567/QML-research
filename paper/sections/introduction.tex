@@ -1,21 +1,67 @@
-% ===================================================================== INTRODUCTION
-% Target: about one column. Write in your own words; cite with \cite{key} (keys in
-% literature/refs.bib). Cover, in this order:
-%  1. QML classifiers are usually trained in noiseless simulation and then run on NISQ
-%     hardware, whose noise differs from the simulator and changes from day to day.
-%     \cite{wang2021nibp,heyraud2022noisykernels}
-%  2. What is known: the one-off simulator-to-hardware gap and fixes for it
-%     \cite{wang2022quantumnat,nation2021m3}; noise that varies over time breaks conformal
-%     guarantees, shown on one day of data \cite{park2023qcp,spencer2026aqcp}; multi-day drift
-%     and emulator trust were studied for QAOA, not classifiers \cite{qaoa2026drift}; small
-%     hardware test sets mislead \cite{qbiobench2026}.
-%  3. The gap in one or two sentences: no multi-day, multi-device measurement for classifiers
-%     that also prices each repair in QPU seconds under a free-tier budget.
-%  4. Research questions RQ1-RQ4 (copy their meaning from preregistration.md, not the wording).
-%  5. Contributions as a short itemize list, each tied to a result section. Only claim what the
-%     final results support.
-%  6. One sentence that no quantum advantage is claimed; tuned classical baselines are reported
-%     \cite{bowles2024benchmarking,schuld2022advantage}.
+% Draft written with an AI assistant on 31 Oct 2026 from the frozen design. Revise it in your
+% own words before submission and run scripts/check_paper.py --overlap.
 \section{Introduction}
 \label{sec:intro}
-\todo{Write the introduction.}
+
+Most quantum machine learning (QML) models are designed and trained in a noiseless simulator
+and only later evaluated on a quantum processor. On current hardware this hand-over is not
+neutral. Gate errors, readout errors and decoherence change the expectation values that a
+classifier reads out \cite{wang2021nibp,heyraud2022noisykernels}, and the noise is not fixed
+either: cloud processors are recalibrated regularly and their parameters move between
+calibrations \cite{realtimecal2023}. A model that works on the day it is tested may behave
+differently a few days later, or on a sister device.
+
+Earlier work has measured and narrowed the simulator-to-hardware gap at one point in time.
+QuantumNAT showed that noise acts on measured outputs roughly as a scale and a shift, and
+corrected for it with normalisation and noise-aware training \cite{wang2022quantumnat}. Readout
+mitigation removes much of the measurement error at little cost
+\cite{nation2021m3,vandenberg2022trex}. For uncertainty, conformal prediction turns a few
+measurement shots into prediction sets with a coverage guarantee \cite{park2023qcp}, but noise
+that changes over time can void the guarantee; an adaptive variant restores average coverage,
+shown with data taken on one processor on a single day \cite{spencer2026aqcp}. Over longer
+periods, a study of QAOA on three Heron processors found that emulators built from calibration
+data overstated the hardware benefit of calibration-aware compilation \cite{qaoa2026drift}, and
+a hardware benchmark on biosignal tasks found that test sets of the size a small budget allows
+give unstable estimates \cite{qbiobench2026}.
+
+For classifiers, a measurement is still missing that repeats the same frozen models over
+several days and on more than one device, separates day-to-day variation from shot noise, and
+prices each repair in QPU time. The last point matters because free cloud access, such as IBM's
+Open Plan, provides ten minutes of processor time per 28 days\footnote{IBM Quantum plans:
+\url{https://quantum.cloud.ibm.com/docs/en/guides/plans-overview}.}; any repair that needs
+extra circuits competes with the experiment itself.
+
+This paper reports such a measurement. We train three small classifiers on two datasets in
+simulation, freeze them, and run the same \val{n-hw-samples} inputs per dataset on two IBM
+Heron r2 processors, \val{devices}, in \val{sessions-per-device} sessions per device over two
+weeks. Packing \val{patches} copies of each \val{n-qubits}-qubit circuit onto disjoint groups of
+qubits keeps a session near \val{session-usage-mean}~s of QPU time, so the whole campaign fits
+one free account. Hypotheses, analysis and decision rules were registered before the first
+session. We ask four questions:
+\begin{itemize}
+\item[RQ1] How large is the accuracy gap between simulator and hardware, and how well does an
+emulator built from the reported calibration predict it?
+\item[RQ2] How much do results vary between sessions and devices beyond shot noise, and which
+reported calibration quantities explain the variation?
+\item[RQ3] Does the scale-and-shift noise model hold on Heron processors, and is it stable
+over time?
+\item[RQ4] Which low-cost repairs recover accuracy and calibrated uncertainty, per QPU second?
+\end{itemize}
+
+Our contributions are:
+\begin{itemize}
+\item a pre-registered, budget-capped protocol for tracking QML classifiers on cloud hardware,
+with circuit packing checked for crosstalk in a pilot (Section~\ref{sec:methods});
+\item paired measurements on two devices that answer RQ1--RQ4 (Section~\ref{sec:results});
+\item a comparison of five repair families by accuracy gained per QPU second, including a
+few-shot refit of the classical head and adaptive conformal prediction;
+\item the code, frozen models and raw data, with calibration snapshots taken at submission and
+at job start.
+\end{itemize}
+We make no claim of quantum advantage. In simulation, tuned classical models match or beat the
+quantum models: on two curves an RBF support vector machine reaches
+\val{base-acc-twocurves-rbfsvm} against \val{sim-acc-twocurves-M1} for the best quantum model,
+and on breast cancer the best accuracies differ by less than their confidence intervals
+(Table~\ref{tab:sim}), in line with recent benchmark studies
+\cite{bowles2024benchmarking,schuld2022advantage}. Our question is how reliably a given quantum
+model behaves once it leaves the simulator.

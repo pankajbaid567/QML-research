@@ -370,3 +370,12 @@ One entry per paper in refs.bib. Status: unread, skimmed or read.
 - Key results: 
 - Limitations: 
 - Relevance (RQ1-RQ4): 
+
+## wolberg1993breast
+- Status: read
+- Question: n/a (dataset citation)
+- Method: n/a (dataset citation)
+- Hardware and budget: n/a (dataset citation)
+- Key results: n/a (dataset citation)
+- Limitations: n/a (dataset citation)
+- Relevance (RQ1-RQ4): source of the breast_cancer task (scikit-learn copy of UCI dataset 17)

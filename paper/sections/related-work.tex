@@ -1,17 +1,42 @@
-% ===================================================================== RELATED WORK
-% Target: 0.6-0.8 column, three short paragraphs. For each group: what they did, what they
-% found, and how this study differs. Use your reading-log notes, never the abstracts.
-%  (a) Noise in QML models and noise-aware training: \cite{wang2022quantumnat,wang2022quantumnas,
-%      wang2022qoc,wang2021nibp,heyraud2022noisykernels,farib2026crossdevice}
-%  (b) Mitigation and uncertainty: readout mitigation \cite{nation2021m3,vandenberg2022trex},
-%      other mitigation \cite{temme2017zne,czarnik2021cdr,liao2024mlqem}, conformal prediction
-%      for QML \cite{park2023qcp,spencer2026aqcp,gibbs2021aci}, UQ tooling and audits
-%      \cite{quantumuq2026,fernandezbarrios2026conditional}
-%  (c) Benchmarking and hardware studies: \cite{bowles2024benchmarking,qbiobench2026,
-%      gillani2026nids,qaoa2026drift,realtimecal2023}; running circuits side by side
-%      \cite{parallelqml2024,ohkura2022simultaneous,murali2020crosstalk}
-%  Optional sentence on kernel concentration as a different failure mode
-%  \cite{thanasilp2024concentration,shaydulin2022bandwidth}.
+% Draft written with an AI assistant on 31 Oct 2026. Revise it in your own words, and check each
+% claim against your reading-log notes before submission.
 \section{Related Work}
 \label{sec:related}
-\todo{Write the related work.}
+
+\textbf{Noise in QML models.} Local noise can make the gradients of variational models vanish
+exponentially with depth \cite{wang2021nibp}, while in kernel machines decoherence acts as an
+implicit regulariser that limits how many independent features the model can use
+\cite{heyraud2022noisykernels}. Noise-aware methods adapt a model to its device: QuantumNAS
+searches circuit structures and qubit mappings under a noise model \cite{wang2022quantumnas},
+QOC trains on the chip with pruned parameter-shift gradients \cite{wang2022qoc}, and QuantumNAT
+combines noise injection with post-measurement normalisation \cite{wang2022quantumnat}. A recent
+study transfers a learned noise model between two IBM devices with twenty fine-tuning samples
+and identifies two-qubit gate error as the main source of mismatch \cite{farib2026crossdevice}.
+These works characterise each device once; we repeat the same measurement over days and price
+the corrections.
+
+\textbf{Mitigation and uncertainty.} Readout errors can be inverted within a reduced subspace
+\cite{nation2021m3} or corrected for expectation values after randomising the measurement
+\cite{vandenberg2022trex}. Zero-noise extrapolation \cite{temme2017zne}, Clifford data
+regression \cite{czarnik2021cdr} and learned mitigation \cite{liao2024mlqem} also address gate
+noise but require additional circuits, which is expensive on a free budget, so we test only
+repairs that need no or few extra shots. For uncertainty, quantum conformal prediction
+\cite{park2023qcp} and its adaptive form \cite{spencer2026aqcp}, built on adaptive conformal
+inference \cite{gibbs2021aci}, are the closest work; the adaptive study notes that its hardware
+data span a single day and leaves longer drift to future work. Tooling and audits further show
+that variational classifiers tend to be overconfident \cite{quantumuq2026} and that finite-shot
+evaluation alone can shift thresholded metrics \cite{fernandezbarrios2026conditional}.
+
+\textbf{Benchmarking and hardware studies.} Careful benchmarks find that tuned classical models
+match or beat QML models on standard datasets \cite{bowles2024benchmarking}, and an attribution
+audit traces apparent quantum gains in intrusion detection to classical preprocessing and
+regularisation \cite{gillani2026nids}. On hardware, QBioBench evaluates kernels and variational
+classifiers on an IBM Nighthawk processor \cite{qbiobench2026}, and fidelity-kernel experiments
+have reached 156 qubits on IBM devices \cite{covariant2025concentration}. Kernel methods also
+face exponential concentration
+\cite{thanasilp2024concentration,shaydulin2022bandwidth,bandwidth2025similarity}, a different
+failure mode that lies outside our few-qubit setting. Closest to our design is the QAOA study of
+calibration drift and refresh on three Heron processors \cite{qaoa2026drift}. Finally, running
+several circuits side by side raises throughput but can add crosstalk
+\cite{ohkura2022simultaneous,murali2020crosstalk,parallelqml2024}, which is why we test our
+packing in a pilot before relying on it.

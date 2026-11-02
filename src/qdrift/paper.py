@@ -116,6 +116,10 @@ def numbers(cfg, proc, runs) -> dict[str, str]:
          "m3-layers": m["m3_layers"], "m1-features": specs["M1"].n_features, "m2-features": specs["M2"].n_features,
          "m3-features": specs["M3"].n_features, "m1-steps": m["m1_steps"], "m1-restarts": m["m1_restarts"],
          "refit-lambda": m["refit_lambda_per_sample"], "noise-aware-shots": f"{m['noise_aware_shots']:,}",
+         "tc-degree": d["two_curves"]["degree"], "tc-offset": d["two_curves"]["offset"],
+         "tc-noise": d["two_curves"]["noise"], "pilot-samples": cfg["pilot"]["rows"] * hw["max_patches"],
+         "session-pubs": sum(len(s.bases) for s in proc["specs"]) * len(d["datasets"]) + 2,
+         "max-readout-error": hw["max_readout_error"], "max-twoq-error": hw["max_twoq_error"],
          "sessions-per-device": hw["sessions_per_device"], "devices": " and ".join(tt(x) for x in hw["devices"]),
          "fallback": ", ".join(tt(x) for x in hw.get("fallback_devices", [])),
          "per-execution-us": f"{hw['per_execution_s'] * 1e6:.0f}", "budget-cap": b["global_cap_s"],
@@ -126,6 +130,18 @@ def numbers(cfg, proc, runs) -> dict[str, str]:
     waits = [r["queue_h"] for r in camp if np.isfinite(r["queue_h"])]
     if waits:
         v["queue-median-h"], v["queue-max-h"] = f"{np.median(waits):.1f}", f"{np.max(waits):.1f}"
+    ages = [r["age_h"] for r in runs if np.isfinite(r["age_h"])]
+    if ages:
+        v["cal-age-min-h"], v["cal-age-max-h"] = f"{min(ages):.1f}", f"{max(ages):.1f}"
+    v["max-cz"] = max(sum(op.gate == "cz" for op in s.ops) for s in proc["specs"])
+    try:   # registration tag: date and commit
+        tag = subprocess.run(["git", "for-each-ref", "refs/tags/prereg-v1",
+                              "--format=%(taggerdate:short) %(*objectname:short)"],
+                             cwd=cfg.root, capture_output=True, text=True, timeout=10).stdout.split()
+        if len(tag) == 2:
+            v["prereg-date"], v["prereg-commit"] = tag
+    except Exception:
+        pass
     if camp:
         v["session-usage-mean"] = f"{np.mean([r['usage_s'] for r in camp]):.1f}"
         v["campaign-first"], v["campaign-last"] = min(r["start"] for r in camp)[:10], max(r["start"] for r in camp)[:10]

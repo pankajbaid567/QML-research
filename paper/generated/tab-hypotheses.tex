@@ -1,6 +1,6 @@
 \begin{table*}[t]
 \centering
-\caption{Pre-registered hypotheses, test statistics (mean and 95\% bootstrap interval) and decisions. Preliminary: 2 of 10 sessions.}
+\caption{Pre-registered hypotheses, test statistics (mean and 95\% bootstrap interval) and decisions. Preliminary: 4 of 10 sessions.}
 \label{tab:hypotheses}
 \footnotesize
 \setlength{\tabcolsep}{3.5pt}
@@ -8,11 +8,11 @@
 \toprule
  & Hypothesis & Statistic & Decision \\
 \midrule
-H1 & Emulator overestimates hardware accuracy & EMU$-$R0 0.074 [0.044, 0.105] & supported \\
-H2 & Session-to-session variation exceeds shot noise & -- & pending \\
-H3 & Refit on 16 labels (R2$_{16}$) beats normalisation (R1) & R2$_{16}-$R1 0.013 [-0.001, 0.029] & not supported \\
-H4 & Readout error is the strongest calibration predictor & largest: age\_h & not supported \\
-H5 & Split CP under-covers later sessions; ACI holds & -- & pending \\
+H1 & Emulator overestimates hardware accuracy & EMU$-$R0 0.074 [0.051, 0.099] & supported \\
+H2 & Session-to-session variation exceeds shot noise & ratio 3.30 [2.82, 3.85] & supported \\
+H3 & Refit on 16 labels (R2$_{16}$) beats normalisation (R1) & R2$_{16}-$R1 0.005 [-0.004, 0.015] & not supported \\
+H4 & Readout error is the strongest calibration predictor & largest: twoq & not supported \\
+H5 & Split CP under-covers later sessions; ACI holds & CP$_{\mathrm{s1}}$ 0.932 [0.906, 0.958], ACI 0.908 [0.904, 0.912] & not supported \\
 \bottomrule
 \end{tabular}
 \end{table*}
