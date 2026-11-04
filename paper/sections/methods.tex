@@ -65,9 +65,13 @@ chains were chosen once, greedily by summed readout and CZ error in the reported
 gates with a fixed identity layout, so no SWAP gates appear, and every compiled circuit is
 checked to act only on its chains. Hardware input $i$ always runs on chain $i \bmod
 \val{patches}$, which pairs the data across sessions. A pilot on each device ran
-\val{pilot-samples} inputs both packed and alone on their chain (Table~\ref{tab:pilot}): the
-output distributions differed by no more than shot noise, and the billed cost was
-\val{per-execution-us}~$\mu$s per shot.
+\val{pilot-samples} inputs of M1 and M3 both packed and alone on their chain. Against a
+shot-noise null, the excess total-variation distance between packed and isolated outputs had
+95\% intervals between \val{pilot-tvd-lo-min} and \val{pilot-tvd-hi-max}, and the
+packed-minus-isolated accuracy differences had intervals between \val{pilot-acc-lo-min} and
+\val{pilot-acc-hi-max}. \val{pilot-zero} of these intervals contained zero, so packing caused
+no detectable change; at this sample size the check can exclude only large crosstalk effects.
+The pilots also fixed the billed cost at \val{per-execution-us}~$\mu$s per shot.
 
 Each device was scheduled for \val{sessions-per-device} sessions within 14 days at a similar time
 of day (deviations are listed in Section~\ref{sec:discussion}); job start, queue wait and billed time are listed in Table~\ref{tab:protocol}. For
@@ -125,4 +129,5 @@ are reported in Section~\ref{sec:discussion}.
 
 \input{generated/tab-sim}
 \input{generated/tab-protocol}
-\input{generated/tab-pilot}
+% The pilot table (generated/tab-pilot.tex) is kept for the repository; the text above gives
+% its numbers, which saves space in the 8-page limit.

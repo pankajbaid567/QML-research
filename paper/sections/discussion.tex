@@ -9,8 +9,8 @@
 \todo{Interpretation of the results.}
 
 \textbf{Limitations.} On the free plan a job runs when the queue allows, not at a chosen time:
-queue waits reached \val{queue-max-h}~h, and with one job per session the campaign holds
-\val{sessions-done} sessions. The models are small (\val{n-qubits} qubits, at most \val{max-cz}
+queue waits reached \val{queue-max-h}~h during the campaign (\val{queue-max-all-h}~h including
+the pilots), and with one job per session the campaign holds \val{sessions-done} sessions. The models are small (\val{n-qubits} qubits, at most \val{max-cz}
 CZ gates) and the study covers two datasets with \val{n-test} test inputs per session, so the
 accuracy of a single session is uncertain by several points and only effects pooled over
 sessions are resolved. The qubit chains were chosen from one day's calibration and then kept

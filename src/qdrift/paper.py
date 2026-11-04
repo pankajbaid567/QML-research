@@ -130,6 +130,9 @@ def numbers(cfg, proc, runs) -> dict[str, str]:
     waits = [r["queue_h"] for r in camp if np.isfinite(r["queue_h"])]
     if waits:
         v["queue-median-h"], v["queue-max-h"] = f"{np.median(waits):.1f}", f"{np.max(waits):.1f}"
+    all_waits = [r["queue_h"] for r in runs if np.isfinite(r["queue_h"])]
+    if all_waits:
+        v["queue-max-all-h"] = f"{np.max(all_waits):.1f}"
     ages = [r["age_h"] for r in runs if np.isfinite(r["age_h"])]
     if ages:
         v["cal-age-min-h"], v["cal-age-max-h"] = f"{min(ages):.1f}", f"{max(ages):.1f}"
@@ -166,7 +169,98 @@ def numbers(cfg, proc, runs) -> dict[str, str]:
             stat = next((h[s] for s in ("mean_emu_minus_hw", "mean_ratio", "mean_diff") if s in h), None)
             if stat is not None:
                 v[f"{tag}-mean"], v[f"{tag}-lo"], v[f"{tag}-hi"] = f3(stat), f3(h["ci"][0]), f3(h["ci"][1])
+            if "slope_hw_on_emu" in h:
+                v["h1-slope"] = f"{h['slope_hw_on_emu']:.2f}"
+            if "largest_term" in h:
+                v["h4-largest"] = REG_TERM.get(h["largest_term"], esc(h["largest_term"]))
+            for name in ("cp_s1", "aci"):
+                if name in h:
+                    k = key("h5", name)
+                    v[k + "-mean"], v[k + "-lo"], v[k + "-hi"] = (f3(x) for x in h[name])
+    v.update(result_numbers(cfg))
     return {k: str(x) for k, x in v.items()}
+
+
+REG_TERM = {"readout": "readout error", "twoq": "CZ error", "t1_us": r"$T_1$", "t2_us": r"$T_2$",
+            "age_h": "calibration age"}
+
+
+def pp(x, signed: bool = True) -> str:
+    """A fraction as percentage points."""
+    if x is None or not np.isfinite(x):
+        return "--"
+    return f"{100 * x:+.1f}" if signed else f"{100 * x:.1f}"
+
+
+def result_numbers(cfg) -> dict:
+    """Macros for the Results text, recomputed from results/ on every build."""
+    v = {}
+    met = _csv(cfg.results / "metrics.csv")
+    if met is not None and len(met):
+        w = met.pivot_table(index=["device", "session", "dataset", "model"], columns="method", values="acc")
+        v["n-cases"] = len(w)
+        gap = w["SIM"] - w["R0"]
+        for level in ("device", "dataset", "model"):
+            for name, g in gap.groupby(level=level):
+                v[key("gap", short(name), "pp")] = pp(g.mean(), signed=False)
+        if "EMU" in w:
+            d = (w["EMU"] - w["R0"]).dropna()
+            v["emu-over-count"], v["emu-cases"] = int((d > 0).sum()), len(d)
+            pair = w[["EMU", "R0"]].dropna()
+            if len(pair) > 2:
+                v["emu-hw-r"] = f"{np.corrcoef(pair['EMU'], pair['R0'])[0, 1]:.2f}"
+        r0 = met[met["method"] == "R0"].groupby(["device", "dataset", "model"])["acc"]
+        spread = r0.max() - r0.min()
+        v["r0-spread-mean-pp"], v["r0-spread-max-pp"] = pp(spread.mean(), False), pp(spread.max(), False)
+        for meth, g in met.groupby("method"):
+            v[key("ece", meth)], v[key("brier", meth)] = f3(g["ece"].mean()), f3(g["brier"].mean())
+            v[key("auc", meth)] = f3(g["auc"].mean())
+    rec = _csv(cfg.results / "recovered.csv")
+    if rec is not None and len(rec):
+        for _, r in rec.iterrows():
+            k = key("gain", r["method"])
+            v[k + "-pp"] = pp(r["acc_gain"])
+            if "gain_lo" in rec:
+                v[k + "-lo"], v[k + "-hi"] = pp(r["gain_lo"]), pp(r["gain_hi"])
+            v[key("cost", r["method"])] = f"{r['extra_qpu_s']:.2f}"
+            v[key("gapshare", r["method"])] = f"{100 * r['recovered_frac']:.0f}" if np.isfinite(r["recovered_frac"]) else "--"
+        best = rec.sort_values("acc_gain", ascending=False).iloc[0]
+        v["rep-best"], v["rep-best-gain-pp"] = METHOD.get(best["method"], esc(best["method"])), pp(best["acc_gain"])
+        if "n_gap" in rec:
+            v["n-gap-cases"] = int(rec["n_gap"].max())
+    fits = _csv(cfg.results / "noise_fits.csv")
+    if fits is not None and len(fits):
+        for col, name in (("gamma", "gamma"), ("r2", "r2")):
+            q1, q2, q3 = fits[col].quantile([0.25, 0.5, 0.75])
+            v[f"nm-{name}-q1"], v[f"nm-{name}-median"], v[f"nm-{name}-q3"] = f3(q1), f3(q2), f3(q3)
+        v["nm-absbeta-median"], v["nm-fits"] = f3(fits["beta"].abs().median()), len(fits)
+        for mo, g in fits.groupby("model"):
+            v[key("nm-gamma", mo)], v[key("nm-r2", mo)] = f3(g["gamma"].median()), f3(g["r2"].median())
+        sd = fits.groupby(["device", "dataset", "model", "feature"])["gamma"].std(ddof=1).dropna()
+        if len(sd):
+            v["nm-gamma-sd-median"] = f3(sd.median())
+    od = _csv(cfg.results / "overdispersion.csv")
+    if od is not None and len(od):
+        for level in ("device", "model", "dataset"):
+            for name, g in od.groupby(level):
+                v[key("od", short(name))] = f"{g['ratio'].mean():.2f}"
+        v["od-frac-above-1"] = f"{100 * (od['ratio'] > 1).mean():.0f}"
+    reg = _csv(cfg.results / "regression.csv")
+    if reg is not None and len(reg):
+        for _, r in reg.iterrows():
+            k = key("reg", r["term"])
+            v[k + "-coef"], v[k + "-lo"], v[k + "-hi"] = (f"{x:.4f}" for x in (r["coef"], r["lo"], r["hi"]))
+            v[k + "-p"] = "<0.001" if r["p"] < 0.001 else f"{r['p']:.3f}"
+        v["reg-largest"] = REG_TERM.get(reg.iloc[reg["coef"].abs().argmax()]["term"], "--")
+    cp = _csv(cfg.results / "conformal.csv")
+    if cp is not None and len(cp):
+        for meth, g in cp.groupby("method"):
+            k = key("cov", meth)
+            later = g[g["session"] > 1]["coverage"]
+            v[k], v[k + "-min"] = f3(g["coverage"].mean()), f3(g["coverage"].min())
+            v[k + "-later"] = f3(later.mean()) if len(later) else "--"
+            v[key("size", meth)] = f"{g['set_size'].mean():.2f}"
+    return v
 
 
 # ---------------------------------------------------------------- tables
@@ -223,14 +317,21 @@ def tab_accuracy(cfg, n_sessions: int) -> str | None:
 
 def tab_repairs(cfg) -> str | None:
     rec = _csv(cfg.results / "recovered.csv")
-    if rec is None:
+    if rec is None or not len(rec):
         return None
-    rows = [[METHOD.get(r["method"], esc(r["method"])), f"{100 * r['acc_gain']:+.1f}",
-             f"{100 * r['recovered_frac']:.0f}" if np.isfinite(r["recovered_frac"]) else "--",
-             f"{r['extra_qpu_s']:.2f}", str(int(r["n"]))] for _, r in rec.iterrows()]
-    return table("table", "Repairs ranked by mean accuracy gain over R0, share of the simulator-to-hardware gap "
-                 "they recover (cases with a gap above 2 points), and extra QPU seconds per session.",
-                 "tab:repairs", "lrrrr", ["Repair", "Gain (pp)", "Gap (\\%)", "Extra QPU (s)", "$n$"], rows)
+    rows = []
+    for _, r in rec.iterrows():
+        gain = f"{100 * r['acc_gain']:+.1f}"
+        if "gain_lo" in rec and np.isfinite(r["gain_lo"]):
+            gain += f" [{100 * r['gain_lo']:+.1f}, {100 * r['gain_hi']:+.1f}]"
+        share = f"{100 * r['recovered_frac']:.0f}" if np.isfinite(r["recovered_frac"]) else "--"
+        rows.append([METHOD.get(r["method"], esc(r["method"])), gain, share, f"{r['extra_qpu_s']:.2f}"])
+    n_cases = int(rec["n_cases"].max()) if "n_cases" in rec else int(rec["n"].max())
+    n_gap = int(rec["n_gap"].max()) if "n_gap" in rec else n_cases
+    return table("table", "Repairs ranked by mean accuracy gain over R0 in percentage points, with a 95\\% bootstrap "
+                 f"interval over {n_cases} cases (device, session, dataset, model); mean share of the "
+                 f"simulator-to-hardware gap recovered in the {n_gap} cases with a gap above 2 points; and extra QPU "
+                 "seconds per session.", "tab:repairs", "lccr", ["Repair", "Gain (pp)", "Gap (\\%)", "QPU (s)"], rows)
 
 
 def tab_coverage(cfg) -> str | None:
@@ -265,7 +366,7 @@ def tab_hypotheses(cfg, n_sessions: int) -> str | None:
         elif "mean_diff" in h:
             stat = r"R2$_{16}-$R1 " + ci(h["mean_diff"], *h["ci"])
         elif "largest_term" in h:
-            stat = "largest: " + esc(h["largest_term"])
+            stat = "largest term: " + REG_TERM.get(h["largest_term"], esc(h["largest_term"]))
         else:
             stat = r"CP$_{\mathrm{s1}}$ " + ci(*h["cp_s1"]) + ", ACI " + ci(*h["aci"])
         rows.append([tag, text, stat, {True: "supported", False: "not supported", None: "--"}[h.get("supported")]])
@@ -275,19 +376,38 @@ def tab_hypotheses(cfg, n_sessions: int) -> str | None:
                  "decisions." + note, "tab:hypotheses", "llll", ["", "Hypothesis", "Statistic", "Decision"], rows)
 
 
-def tab_pilot(cfg, proc) -> str | None:
-    rows = []
+def pilot_results(cfg, proc) -> list[tuple[str, dict]]:
+    """analyze_pilot for every saved pilot, as (device, result) pairs."""
+    out = []
     for device in devices_for(cfg):
         pdir = cfg.raw / "pilot" / device
-        for p in (sorted(pdir.iterdir()) if pdir.exists() else []):
-            res = analyze_pilot(cfg, proc, p)
-            for k, r in res.items():
-                if isinstance(r, dict):
-                    model = k.split("__")[1]
-                    lo, hi = r["tvd_excess_ci"]
-                    dlo, dhi = r["acc_diff_ci"]
-                    rows.append([short(device), model, f"[{lo:+.3f}, {hi:+.3f}]", f"{r['acc_packed']:.2f}",
-                                 f"{r['acc_isolated']:.2f}", f"[{dlo:+.2f}, {dhi:+.2f}]"])
+        for p in (sorted(q for q in pdir.iterdir() if q.is_dir()) if pdir.exists() else []):
+            out.append((device, analyze_pilot(cfg, proc, p)))
+    return out
+
+
+def pilot_numbers(pilots) -> dict:
+    tv = [r["tvd_excess_ci"] for _, res in pilots for r in res.values() if isinstance(r, dict)]
+    ac = [r["acc_diff_ci"] for _, res in pilots for r in res.values() if isinstance(r, dict)]
+    if not tv:
+        return {}
+    zero = all(lo <= 0 <= h for lo, h in tv + ac)
+    return {"pilot-checks": len(tv), "pilot-tvd-hi-max": f"{max(h for _, h in tv):+.3f}",
+            "pilot-tvd-lo-min": f"{min(lo for lo, _ in tv):+.3f}",
+            "pilot-acc-lo-min": f"{min(lo for lo, _ in ac):+.2f}", "pilot-acc-hi-max": f"{max(h for _, h in ac):+.2f}",
+            # The Methods text says that all intervals contain zero; flag it loudly if that is false.
+            "pilot-zero": "All" if zero else r"\textbf{CHECK: not all}"}
+
+
+def tab_pilot(pilots) -> str | None:
+    rows = []
+    for device, res in pilots:
+        for k, r in res.items():
+            if isinstance(r, dict):
+                lo, hi = r["tvd_excess_ci"]
+                dlo, dhi = r["acc_diff_ci"]
+                rows.append([short(device), k.split("__")[1], f"[{lo:+.3f}, {hi:+.3f}]", f"{r['acc_packed']:.2f}",
+                             f"{r['acc_isolated']:.2f}", f"[{dlo:+.2f}, {dhi:+.2f}]"])
     if not rows:
         return None
     return table("table", "Pilot: the same samples run packed with all patches active or alone on their patch. "
@@ -325,14 +445,15 @@ def build(cfg, proc, log=print, compile_pdf: bool = False) -> Path:
     met = cfg.results / "metrics.csv"
     if met.exists() and met.stat().st_mtime < newest:
         log("note: results/ is older than the newest session; run `uv run qdrift analyze` first")
-    vals = numbers(cfg, proc, runs)
+    pilots = pilot_results(cfg, proc)
+    vals = {**numbers(cfg, proc, runs), **{k: str(x) for k, x in pilot_numbers(pilots).items()}}
     lines = ["% Generated by `uv run qdrift paper`; do not edit.",
              r"\providecommand{\qdset}[2]{\expandafter\def\csname qd@#1\endcsname{#2}}"]
     lines += [rf"\qdset{{{k}}}{{{v}}}" for k, v in sorted(vals.items())]
     (gen / "numbers.tex").write_text("\n".join(lines) + "\n")
     tables = {"tab-sim": tab_sim(cfg), "tab-protocol": tab_protocol(runs), "tab-accuracy": tab_accuracy(cfg, n_sessions),
               "tab-repairs": tab_repairs(cfg), "tab-coverage": tab_coverage(cfg),
-              "tab-hypotheses": tab_hypotheses(cfg, n_sessions), "tab-pilot": tab_pilot(cfg, proc)}
+              "tab-hypotheses": tab_hypotheses(cfg, n_sessions), "tab-pilot": tab_pilot(pilots)}
     for name, tex in tables.items():
         (gen / f"{name}.tex").write_text(tex or f"% {name}: no data yet\n")
     figs = sorted((cfg.results / "figures").glob("*.pdf")) if (cfg.results / "figures").exists() else []

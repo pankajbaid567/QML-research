@@ -274,8 +274,10 @@ def hypotheses(cfg, t: dict) -> dict:
     return out
 
 
-def recovered(met: pd.DataFrame) -> pd.DataFrame:
-    """Share of the simulator-to-hardware accuracy gap that each method recovers, and its QPU cost."""
+def recovered(met: pd.DataFrame, nb: int = 2000, seed: int = 0) -> pd.DataFrame:
+    """Accuracy gain of each method over R0 (mean and bootstrap interval over cases), the share of
+    the simulator-to-hardware gap it recovers (cases with a gap above 2 points), and its QPU cost.
+    A case is one device, session, dataset and model."""
     idx = ["device", "session", "dataset", "model"]
     w = met.pivot_table(index=idx, columns="method", values="acc")
     c = met.pivot_table(index=idx, columns="method", values="extra_qpu_s")
@@ -284,107 +286,184 @@ def recovered(met: pd.DataFrame) -> pd.DataFrame:
     for meth in w.columns:
         if meth in ("SIM", "R0", "EMU"):
             continue
+        gain = (w[meth] - w["R0"]).dropna()
+        mean, lo, hi = _mean_ci(gain, nb, seed)
         frac = ((w[meth] - w["R0"]) / gap).dropna()
-        rows.append({"method": meth, "recovered_frac": float(frac.mean()) if len(frac) else np.nan,
-                     "acc_gain": float((w[meth] - w["R0"]).mean()), "extra_qpu_s": float(c[meth].mean()),
-                     "n": int(len(frac))})
+        rows.append({"method": meth, "acc_gain": mean, "gain_lo": lo, "gain_hi": hi, "n_cases": int(len(gain)),
+                     "recovered_frac": float(frac.mean()) if len(frac) else np.nan, "n_gap": int(len(frac)),
+                     "extra_qpu_s": float(c[meth].mean())})
     return pd.DataFrame(rows).sort_values("acc_gain", ascending=False)
 
 
 # ---------------------------------------------------------------- figures
 
-def figures(t: dict, out: Path, alpha: float) -> list[Path]:
+DS_NAME = {"two_curves": "Two curves", "breast_cancer": "Breast cancer"}
+METHOD_NAME = {"SIM": "simulator", "EMU": "emulator", "R0": "R0", "R1": "R1", "R2_8": r"R2$_{8}$",
+               "R2_16": r"R2$_{16}$", "R2_32": r"R2$_{32}$", "R2_16_s1": r"R2$_{16}^{\mathrm{s1}}$",
+               "R3m": r"R3$_{\mathrm{m}}$", "R3r": r"R3$_{\mathrm{r}}$", "R4": "R4",
+               "CP_sim": r"CP$_{\mathrm{sim}}$", "CP_s1": r"CP$_{\mathrm{s1}}$", "CP_same": r"CP$_{\mathrm{same}}$",
+               "ACI": "ACI"}
+COL_IN, TEXT_IN = 3.5, 7.16   # IEEE two-column: column width and text width in inches
+
+
+def _pyplot():
+    """Matplotlib with an IEEE-like style: 8 pt serif text, embedded TrueType fonts in PDFs."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    plt.rcParams.update({
+        "font.family": "serif", "font.serif": ["STIXGeneral", "Times New Roman", "DejaVu Serif"],
+        "mathtext.fontset": "stix", "font.size": 8, "axes.titlesize": 8, "axes.labelsize": 8,
+        "legend.fontsize": 7, "xtick.labelsize": 7, "ytick.labelsize": 7, "axes.linewidth": 0.6,
+        "lines.linewidth": 1.0, "lines.markersize": 3.5, "legend.frameon": False, "legend.handlelength": 1.6,
+        "savefig.bbox": "tight", "savefig.pad_inches": 0.02, "pdf.fonttype": 42})
+    return plt
+
+
+def figures(t: dict, out: Path, alpha: float) -> list[Path]:
+    """Six figures sized for an IEEE two-column paper (PNG for viewing, PDF for LaTeX)."""
+    plt = _pyplot()
+    from matplotlib.lines import Line2D
     out.mkdir(parents=True, exist_ok=True)
     met, cp, fits, rec = t["metrics"], t["conformal"], t["noise_fits"], t["recovered"]
     datasets, models = sorted(met["dataset"].unique()), sorted(met["model"].unique())
+    devices, sessions = sorted(met["device"].unique()), sorted(int(s) for s in met["session"].unique())
+    dstyle = dict(zip(devices, ["-", "--", ":"]))
+    mcolor = {m: f"C{i}" for i, m in enumerate(models)}
     paths = []
 
-    def save(fig, name):
+    def short(d):
+        return d.removeprefix("ibm_")
+
+    def save(fig, name, rect=None):
         p = out / name
-        fig.tight_layout()
-        fig.savefig(p, dpi=200)
+        fig.tight_layout(rect=rect) if rect else fig.tight_layout()
+        fig.savefig(p, dpi=300)
         fig.savefig(p.with_suffix(".pdf"))   # vector copy for the paper
         plt.close(fig)
         paths.append(p)
 
-    # 1. simulator vs emulator vs hardware
-    fig, axes = plt.subplots(1, len(datasets), figsize=(3.5 * len(datasets), 3), squeeze=False)
+    def device_handles(color="k"):
+        return [Line2D([], [], color=color, ls=dstyle[d], label=short(d)) for d in devices]
+
+    # 1. simulator vs emulator vs hardware (mean and spread over sessions and devices)
+    fig, axes = plt.subplots(1, len(datasets), figsize=(TEXT_IN, 2.0), squeeze=False)
     for ax, dn in zip(axes[0], datasets):
         g = met[met["dataset"] == dn]
         for j, meth in enumerate(["SIM", "EMU", "R0"]):
             s = g[g["method"] == meth].groupby("model")["acc"].agg(["mean", "std"]).reindex(models)
             ax.errorbar(np.arange(len(models)) + (j - 1) * 0.2, s["mean"], yerr=s["std"].fillna(0), fmt="o",
-                        capsize=3, label={"SIM": "simulator", "EMU": "calibration emulator", "R0": "hardware"}[meth])
+                        capsize=2, label={"SIM": "simulator", "EMU": "calibration emulator", "R0": "hardware"}[meth])
         ax.set_xticks(range(len(models)), models)
-        ax.set_title(dn)
+        ax.set_title(DS_NAME.get(dn, dn))
         ax.set_ylabel("test accuracy")
-    axes[0][0].legend(fontsize=7)
+    axes[0][0].legend()
     save(fig, "fig1_sim_emulator_hardware.png")
 
-    # 2. drift curves
+    # 2. drift: accuracy per session, R0 with 95% intervals, selected repairs, simulator as reference
     shown = [x for x in ["R0", "R1", "R2_16", "R3m", "R4"] if x in set(met["method"])]
-    fig, axes = plt.subplots(len(datasets), len(models), figsize=(3.2 * len(models), 2.6 * len(datasets)),
-                             squeeze=False, sharey=True)
+    rcolor = {m: f"C{i}" for i, m in enumerate(shown)}
+    fig, axes = plt.subplots(len(datasets), len(models), figsize=(TEXT_IN, 1.75 * len(datasets) + 0.35),
+                             squeeze=False, sharex=True, sharey="row")
     for i, dn in enumerate(datasets):
         for j, mo in enumerate(models):
             ax = axes[i][j]
             g = met[(met["dataset"] == dn) & (met["model"] == mo)]
+            ax.axhline(g[g["method"] == "SIM"]["acc"].mean(), color="0.5", ls=":", lw=0.9)
             for meth in shown:
-                for dev, ls in zip(sorted(g["device"].unique()), ["-", "--", ":"]):
+                for dev in devices:
                     s = g[(g["method"] == meth) & (g["device"] == dev)].sort_values("session")
-                    ax.plot(s["session"], s["acc"], ls, marker="o", ms=3, label=f"{meth} {dev}",
-                            color=f"C{shown.index(meth)}")
-            ax.set_title(f"{dn} {mo}", fontsize=8)
-            ax.set_xlabel("session")
-    axes[0][0].set_ylabel("accuracy")
-    axes[0][-1].legend(fontsize=5, ncol=2)
-    save(fig, "fig2_drift.png")
+                    if s.empty:
+                        continue
+                    if meth == "R0":
+                        ax.errorbar(s["session"], s["acc"], yerr=[s["acc"] - s["acc_lo"], s["acc_hi"] - s["acc"]],
+                                    color=rcolor[meth], ls=dstyle[dev], marker="o", ms=2.8, capsize=1.5,
+                                    elinewidth=0.5)
+                    else:
+                        ax.plot(s["session"], s["acc"], color=rcolor[meth], ls=dstyle[dev], marker="o", ms=2.2,
+                                lw=0.8, alpha=0.9)
+            ax.set_title(f"{DS_NAME.get(dn, dn)}, {mo}")
+            if i == len(datasets) - 1:
+                ax.set_xlabel("session")
+            if j == 0:
+                ax.set_ylabel("test accuracy")
+    axes[0][0].set_xticks(sessions)
+    handles = [Line2D([], [], color=rcolor[m], marker="o", ms=3, label=METHOD_NAME.get(m, m)) for m in shown]
+    handles += [Line2D([], [], color="0.5", ls=":", label="simulator")] + device_handles()
+    fig.legend(handles=handles, loc="upper center", ncol=len(handles), bbox_to_anchor=(0.5, 1.0))
+    save(fig, "fig2_drift.png", rect=(0, 0, 1, 0.92))
 
-    # 3. emulator prediction vs hardware
+    # 3. emulator prediction vs hardware: colour = model, marker = dataset, filled = first device
     if "EMU" in set(met["method"]):
-        w = _paired(met, "EMU", "R0")
-        fig, ax = plt.subplots(figsize=(3.4, 3.2))
-        ax.scatter(w["EMU"], w["R0"], s=12)
-        lim = [min(w.min().min(), 0.5), 1.0]
-        ax.plot(lim, lim, "k--", lw=0.8)
+        w = met.pivot_table(index=["device", "session", "dataset", "model"], columns="method",
+                            values="acc")[["EMU", "R0"]].dropna().reset_index()
+        marker = dict(zip(datasets, ["o", "s", "^"]))
+        fig, ax = plt.subplots(figsize=(COL_IN, 2.9))
+        for _, r in w.iterrows():
+            c = mcolor[r["model"]]
+            ax.scatter(r["EMU"], r["R0"], marker=marker[r["dataset"]], s=18, linewidths=0.8, edgecolors=c,
+                       facecolors=c if r["device"] == devices[0] else "none")
+        lo = float(min(w["EMU"].min(), w["R0"].min())) - 0.03
+        ax.plot([lo, 1], [lo, 1], "k--", lw=0.7)
+        ax.set_xlim(lo, 1)
+        ax.set_ylim(lo, 1)
+        ax.set_aspect("equal")
         ax.set_xlabel("emulator-predicted accuracy")
-        ax.set_ylabel("hardware accuracy")
+        ax.set_ylabel("hardware accuracy (R0)")
+        handles = [Line2D([], [], ls="", marker="o", color=mcolor[m], label=m) for m in models]
+        handles += [Line2D([], [], ls="", marker=marker[d], color="0.35", label=DS_NAME.get(d, d)) for d in datasets]
+        handles += [Line2D([], [], ls="", marker="o", color="0.35", label=f"filled: {short(devices[0])}")]
+        handles += [Line2D([], [], ls="", marker="o", markerfacecolor="none", markeredgecolor="0.35",
+                           label=f"open: {short(d)}") for d in devices[1:]]
+        ax.legend(handles=handles, loc="upper left", handletextpad=0.3)
         save(fig, "fig3_emulator_vs_hardware.png")
 
-    # 4. noise-model scale and shift over sessions
+    # 4. noise model F_hw = gamma F_sim + beta: median gamma and mean |beta| per session
     if len(fits):
-        fig, axes = plt.subplots(1, 2, figsize=(7, 2.8))
-        g = fits.groupby(["device", "model", "session"])[["gamma", "beta"]].mean().reset_index()
-        for ax, col in zip(axes, ["gamma", "beta"]):
+        g = fits.assign(abs_beta=fits["beta"].abs()).groupby(["device", "model", "session"]).agg(
+            gamma=("gamma", "median"), abs_beta=("abs_beta", "mean")).reset_index()
+        fig, axes = plt.subplots(1, 2, figsize=(COL_IN, 1.95), sharex=True)
+        for ax, col, lab in zip(axes, ["gamma", "abs_beta"], [r"median scale $\gamma$", r"mean shift $|\beta|$"]):
             for (dev, mo), s in g.groupby(["device", "model"]):
-                ax.plot(s["session"], s[col], marker="o", ms=3, label=f"{mo} {dev}")
+                ax.plot(s["session"], s[col], color=mcolor[mo], ls=dstyle[dev], marker="o", ms=2.5)
             ax.set_xlabel("session")
-            ax.set_ylabel({"gamma": "scale (gamma)", "beta": "shift (beta)"}[col])
-        axes[0].legend(fontsize=6)
-        save(fig, "fig4_noise_model.png")
+            ax.set_ylabel(lab)
+            ax.set_xticks(sessions)
+        handles = [Line2D([], [], color=mcolor[m], label=m) for m in models] + device_handles()
+        fig.legend(handles=handles, loc="upper center", ncol=len(handles), bbox_to_anchor=(0.5, 1.0))
+        save(fig, "fig4_noise_model.png", rect=(0, 0, 1, 0.86))
 
-    # 5. recovered accuracy vs QPU cost
-    fig, ax = plt.subplots(figsize=(3.6, 3))
-    for _, r in rec.iterrows():
-        ax.scatter(r["extra_qpu_s"], r["acc_gain"], s=14)
-        ax.annotate(r["method"], (r["extra_qpu_s"], r["acc_gain"]), fontsize=6)
+    # 5. accuracy gain of each repair (mean and 95% interval) against its extra QPU time.
+    # Repairs with the same cost are spread horizontally (by 0.03 s) so their intervals stay readable.
+    fig, ax = plt.subplots(figsize=(COL_IN, 2.3))
+    cost = rec["extra_qpu_s"].round(3)
+    rank = rec.groupby(cost).cumcount().to_numpy()
+    size = cost.map(cost.value_counts()).to_numpy()
+    for (_, r), k, m in zip(rec.iterrows(), rank, size):
+        x, y = r["extra_qpu_s"] + (k - (m - 1) / 2) * 0.03, 100 * r["acc_gain"]
+        err = None
+        if "gain_lo" in r and np.isfinite(r["gain_lo"]):
+            err = [[100 * (r["acc_gain"] - r["gain_lo"])], [100 * (r["gain_hi"] - r["acc_gain"])]]
+        ax.errorbar(x, y, yerr=err, fmt="o", color="C0", ms=3, capsize=2, elinewidth=0.6)
+        ax.annotate(METHOD_NAME.get(r["method"], r["method"]), (x, y), xytext=(3, 2), textcoords="offset points",
+                    fontsize=7)
     ax.axhline(0, color="k", lw=0.6)
     ax.set_xlabel("extra QPU seconds per session")
-    ax.set_ylabel("accuracy gain over R0")
+    ax.set_ylabel("accuracy gain over R0 (points)")
     save(fig, "fig5_repair_cost.png")
 
-    # 6. conformal coverage over sessions
-    fig, ax = plt.subplots(figsize=(3.8, 3))
+    # 6. conformal coverage per session (mean over devices, datasets and models)
+    fig, ax = plt.subplots(figsize=(COL_IN, 2.2))
     g = cp.groupby(["method", "session"])["coverage"].mean().reset_index()
-    for meth, s in g.groupby("method"):
-        ax.plot(s["session"], s["coverage"], marker="o", ms=3, label=meth)
-    ax.axhline(1 - alpha, color="k", ls="--", lw=0.8)
+    for meth in ["CP_sim", "CP_s1", "CP_same", "ACI"]:
+        s = g[g["method"] == meth]
+        if len(s):
+            ax.plot(s["session"], s["coverage"], marker="o", ms=3, label=METHOD_NAME[meth])
+    ax.axhline(1 - alpha, color="k", ls="--", lw=0.7, label="target")
+    ax.set_xticks(sessions)
     ax.set_xlabel("session")
     ax.set_ylabel("coverage")
-    ax.legend(fontsize=7)
+    ax.legend(ncol=3, loc="best")
     save(fig, "fig6_coverage.png")
     return paths
 
@@ -393,12 +472,14 @@ def analyze(cfg, proc, log=print) -> dict:
     t = evaluate(cfg, proc)
     if t["metrics"].empty:
         raise SystemExit("no sessions found")
+    ex = cfg["experiment"]
     t["regression"] = calibration_regression(t["samples"])
-    t["recovered"] = recovered(t["metrics"])
+    t["recovered"] = recovered(t["metrics"], ex["bootstrap"], ex["seed"])
+    t["overdispersion"] = overdispersion(t["samples"])
     hyp = hypotheses(cfg, t)
     res = cfg.results
     res.mkdir(parents=True, exist_ok=True)
-    for name in ("metrics", "conformal", "noise_fits", "regression", "recovered"):
+    for name in ("metrics", "conformal", "noise_fits", "regression", "recovered", "overdispersion"):
         t[name].to_csv(res / f"{name}.csv", index=False)
     t["samples"].drop(columns=["feats"]).to_csv(res / "samples.csv", index=False)
     (res / "hypotheses.json").write_text(json.dumps(hyp, indent=1, default=float))
