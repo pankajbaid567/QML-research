@@ -46,12 +46,15 @@
 | 27 Oct | ibm_kingston | 1 | dbg1oudrd2mc73ctp8qg | 1.9 h | 21 s | saved 30 Oct, valid |
 | 30 Oct | ibm_fez | 2 | dbidpilep8hs73anl640 | 0.3 h | 20 s | ran 18:24 UTC, valid |
 | 30 Oct | ibm_kingston | 2 | dbidqso1h92s73838kc0 | 0.2 h | 21 s | ran 18:23 UTC, valid |
+| 4 Nov | ibm_fez | 3 | dblbhfe74qds73dq6bsg | 0.3 h | 20 s | ran 05:07 UTC (10:37 IST), valid |
+| 4 Nov | ibm_kingston | 3 | dblbht674qds73dq6cd0 | 0.0 h | 21 s | ran 04:47 UTC (10:17 IST), valid |
 
 Ledger after day 2: 104.0 s used (pilots 22 s, campaign 82 s), 0 pending. All four sessions
 match the tagged config hash; run-path code is unchanged between prereg-v1 and 8ebe0ed; the
 tag (27 Oct 03:25 UTC) precedes session 1 (03:35 UTC).
-Session 2 ran in the evening (deviation logged). Sessions 3-5: about 09:00 IST on 2, 5 and
-8 Nov, both devices; the window ends 10 Nov.
+Session 2 ran in the evening (deviation logged). Session 3 ran on 4 Nov in the morning slot.
+Ledger after day 3: 145.0 s used (campaign 123 s), 0 pending. Sessions 4 and 5: mornings of
+7 and 9 Nov (10 Nov backup); the window ends 10 Nov.
 
 First look (fez s1, descriptive only, no design changes): hardware R0 accuracy is 4-19 points
 below simulator; measured readout mitigation (R3m) recovers 2-5 points; split conformal

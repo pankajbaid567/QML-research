@@ -19,3 +19,9 @@
 {"type": "attach", "id": "5e0e371e190e", "ts": "2026-10-30T18:09:55.669330+00:00", "job_ids": ["dbidqso1h92s73838kc0"]}
 {"type": "settle", "id": "5e0e371e190e", "ts": "2026-10-30T18:25:03.913883+00:00", "actual_s": 21.0, "status": "DONE"}
 {"type": "settle", "id": "ddf24502f6e3", "ts": "2026-10-31T08:49:24.689626+00:00", "actual_s": 20.0, "status": "DONE"}
+{"type": "reserve", "id": "4488b281d3e7", "ts": "2026-11-04T04:46:51.294724+00:00", "account": "main", "phase": "campaign", "backend": "ibm_fez", "estimate_s": 25.35625, "note": "ibm_fez session 3"}
+{"type": "attach", "id": "4488b281d3e7", "ts": "2026-11-04T04:46:53.813347+00:00", "job_ids": ["dblbhfe74qds73dq6bsg"]}
+{"type": "reserve", "id": "dcbcdcccdaab", "ts": "2026-11-04T04:47:47.025864+00:00", "account": "main", "phase": "campaign", "backend": "ibm_kingston", "estimate_s": 25.35625, "note": "ibm_kingston session 3"}
+{"type": "attach", "id": "dcbcdcccdaab", "ts": "2026-11-04T04:47:49.283370+00:00", "job_ids": ["dblbht674qds73dq6cd0"]}
+{"type": "settle", "id": "4488b281d3e7", "ts": "2026-11-04T08:13:01.054782+00:00", "actual_s": 20.0, "status": "DONE"}
+{"type": "settle", "id": "dcbcdcccdaab", "ts": "2026-11-04T08:13:09.815020+00:00", "actual_s": 21.0, "status": "DONE"}
