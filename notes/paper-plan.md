@@ -23,3 +23,11 @@
 
 ## Claims about cited papers
 Only claims checked against abstracts or text read earlier. Keep other citations generic.
+
+## 10 Nov 2026
+- All sections drafted (AI-assisted): Results, Discussion implications, Abstract and Conclusion
+  added. Every number is a \val{} macro; 21 directional claims are tagged `% claim:<id>` and
+  re-checked by `uv run qdrift paper` (all hold on 6 sessions). PDF: 8 pages incl. references.
+- QCE allows 8-10 pages plus 2 pages of references, so no cuts are needed.
+- To finish after the last session: fetch, validate, analyze, `qdrift paper --build`; rewrite any
+  sentence whose claim fails; fill the repository URL and DOI at release.

@@ -1,0 +1,21 @@
+ok   gap-task: task difference exceeds model and device spread
+ok   emu-optimistic: H1 interval [0.04055555555555556, 0.07833333333333334]
+ok   emu-ranks-well: r >= 0.6
+ok   emu-slope-above-1: slope 1.27
+ok   drift-one-device: {'ibm_fez': 4.27, 'ibm_kingston': 1.1}
+ok   h4-not-readout: twoq
+ok   t2-negative: T2 interval below zero
+ok   gamma-below-1: median 0.914
+ok   gamma-stable: session SD 0.020 vs half IQR
+ok   gamma-models-differ: model medians differ by > 2 session SDs
+ok   small-recovery: max 0.10
+ok   r4-r3m-positive: R4 0.0, R3m 0.2
+ok   only-two-positive: exactly two lower bounds >= 0
+ok   r4-best: R4 has the largest mean gain
+ok   r2-no-gain: every R2 interval contains zero
+ok   r1-no-gain: R1 gain <= 0.5 pp
+ok   r4-best-ece: lowest ECE
+ok   cpsim-under: 0.841
+ok   hwcal-over: both above target
+ok   aci-near: 0.899
+ok   aci-smaller-sets: ACI sets smallest

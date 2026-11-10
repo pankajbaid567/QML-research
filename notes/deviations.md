@@ -20,3 +20,6 @@ checks, PDF copies of figures) is in the git history only.
   10:37 IST). Planned for 2 Nov; moved by two days, still inside the window.
 - Sessions 4 and 5: planned for the mornings of 7 and 9 Nov (10 Nov as backup), so the
   campaign spans 13-14 days.
+- 10 Nov 2026, 20:42 IST (last day of the 14-day window): sessions 4 and 5 not run yet on either
+  device (3 of 5 done). Whatever happens next is reported in the paper through generated
+  sentences (window and session counts in paper/sections/discussion.tex).

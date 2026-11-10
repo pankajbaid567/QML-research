@@ -6,7 +6,7 @@
 %  - Write every sentence yourself. Do not paste from papers, the reading log or AI tools.
 %  - Quote rarely, one short sentence at most, in quotation marks, with \cite.
 %  - Delete the guidance comments (%) before submission and run scripts/check_paper.py.
-\documentclass[conference]{IEEEtran}
+\documentclass[10pt,conference]{IEEEtran}
 \IEEEoverridecommandlockouts
 \usepackage[T1]{fontenc}
 \usepackage{cite}
@@ -35,12 +35,25 @@ pankaj.baid2024@nst.rishihood.edu.in}}
 
 \maketitle
 
-% ABSTRACT: 150-200 words, written last. One or two sentences each: problem; gap (multi-day,
-% multi-device, classifiers, budget-limited); what you did (\val{sessions-done} sessions on
-% \val{devices}, three models, two datasets, pre-registered); the 2-3 main numbers (gap,
-% emulator error, best repair per QPU-second, coverage); one-line takeaway. No citations.
+% Abstract drafted with an AI assistant on 10 Nov 2026; revise it in your own words.
+% Directional words are tagged "% claim:<id>" and re-checked by `uv run qdrift paper`.
 \begin{abstract}
-\todo{Write the abstract last.}
+Quantum machine learning models are usually trained in a noiseless simulator and then run on
+hardware whose noise differs from the simulator and changes from day to day. We measured this
+hand-over for three small classifiers on two datasets, run unchanged on two IBM Heron r2
+processors in \val{sessions-done-per-device} sessions per device over \val{campaign-days} days,
+under a pre-registered design and \val{qpu-used}~s of free-tier QPU time. Hardware accuracy fell
+\val{gap-mean-pp} points below the simulator on average. An emulator built from the reported
+calibration overstated hardware accuracy by \val{h1-mean-pp} points (95\% interval
+\val{h1-lo-pp} to \val{h1-hi-pp}) but ranked the configurations well. % claim:emu-ranks-well
+Feature variation between sessions exceeded shot noise \val{h2-fold}-fold, mostly on one device, % claim:drift-one-device
+and the \val{reg-largest} was the reported quantity most associated with feature error. A linear
+scale-and-shift map described the noise well and stayed stable. % claim:gamma-stable
+Four low-cost repairs recovered at most \val{gapshare-max}\% of the accuracy gap; the best was a
+classical head trained on emulated noisy features, which needs no extra QPU time. % claim:r4-best
+Conformal sets calibrated in simulation under-covered on hardware, while hardware calibration and
+adaptive conformal inference restored coverage. % claim:cpsim-under claim:hwcal-over claim:aci-near
+Code, models and raw data are released.
 \end{abstract}
 
 \begin{IEEEkeywords}

@@ -1,34 +1,50 @@
-% Design-based parts drafted with an AI assistant on 31 Oct 2026; the interpretation is written
-% after the last session. Revise everything in your own words before submission.
+% Drafted with an AI assistant (limitations and deviations on 31 Oct, implications on 10 Nov 2026).
+% Revise everything in your own words. Directional words are tagged "% claim:<id>" and are
+% re-checked by `uv run qdrift paper`.
 \section{Discussion}
 \label{sec:discussion}
 
-% Interpretation (after session 5): what the results mean for someone running a small QML model
-% on a free budget: which repair to use, how far to trust a calibration emulator, and how often
-% to recalibrate. Compare with \cite{wang2022quantumnat,spencer2026aqcp,qaoa2026drift}.
-\todo{Interpretation of the results.}
+\textbf{Implications.} A calibration emulator is a useful screen but not a stand-in for
+hardware. It ordered our configurations well yet overstated their accuracy by \val{h1-mean-pp}
+points on average. % claim:emu-optimistic claim:emu-ranks-well
+A study of calibration-aware QAOA compilation on Heron processors also found that emulators
+overstated the benefit measured on hardware~\cite{qaoa2026drift}, so the bias is unlikely to be
+specific to classifiers. Day-to-day drift was real but differed between devices. % claim:drift-one-device
+A result from one session, such as the single day of hardware data in the adaptive conformal
+study~\cite{spencer2026aqcp}, can therefore be off by several points, while repeating a run on
+another day costs about \val{session-usage-mean}~s here.
+
+Under a free budget the cheap repairs buy little. The head trained on emulated noisy features
+(R4) is free and gave the largest gain and the best calibration, % claim:r4-best claim:r4-best-ece
+and measured readout mitigation is the only paid repair that helped. Normalisation, part of the
+QuantumNAT pipeline that raised accuracy by up to 43\% on IBM devices of
+2021~\cite{wang2022quantumnat}, gave nothing here. % claim:r1-no-gain
+On these processors the global scale and shift of the features is modest and stable, so the
+remaining loss comes from errors that differ between inputs and qubit chains and that one global
+correction cannot remove; the association of feature error with the CZ error and $T_2$ of each
+chain points the same way. % claim:h4-not-readout claim:t2-negative
+For uncertainty, the practical fix is to calibrate on hardware: labels from any session
+restored coverage, and ACI kept it at the target with smaller sets. % claim:hwcal-over claim:aci-near
 
 \textbf{Limitations.} On the free plan a job runs when the queue allows, not at a chosen time:
 queue waits reached \val{queue-max-h}~h during the campaign (\val{queue-max-all-h}~h including
-the pilots), and with one job per session the campaign holds \val{sessions-done} sessions. The models are small (\val{n-qubits} qubits, at most \val{max-cz}
-CZ gates) and the study covers two datasets with \val{n-test} test inputs per session, so the
-accuracy of a single session is uncertain by several points and only effects pooled over
-sessions are resolved. The qubit chains were chosen from one day's calibration and then kept
-fixed; this pairs the data across sessions but means that later sessions may not use the best
-qubits of that day. The emulator treats each chain on its own and contains no crosstalk, and
-the packing check used \val{pilot-samples} inputs per device, enough to exclude only large
-crosstalk effects. Because IBM refreshes the reported calibration often, its age at job start
-lay between \val{cal-age-min-h} and \val{cal-age-max-h}~h, which makes calibration age a weak
-measure of drift. Finally, twirling and dynamical decoupling were switched off by design, so the
-results describe raw device noise; we did not test the repairs in combination with these
-techniques.
+the pilots), and with one job per session the campaign holds \val{sessions-done} sessions. The
+models are small (\val{n-qubits} qubits, at most \val{max-cz} CZ gates) and the study covers two
+datasets with \val{n-test} test inputs per session, so the accuracy of a single session is
+uncertain by several points and only effects pooled over sessions are resolved. The qubit chains
+were chosen from one day's calibration and then kept fixed; this pairs the data across sessions
+but means that later sessions may not use the best qubits of that day. The emulator treats each
+chain on its own and contains no crosstalk, and the packing check used \val{pilot-samples} inputs
+per device, enough to exclude only large crosstalk effects. Because IBM refreshes the reported
+calibration often, its age at job start lay between \val{cal-age-min-h} and \val{cal-age-max-h}~h,
+which makes calibration age a weak measure of drift. Finally, twirling and dynamical decoupling
+were switched off by design, so the results describe raw device noise; we did not test the
+repairs together with these techniques.
 
 \textbf{Deviations from the registration.} The registration is the git tag \texttt{prereg-v1}
-(\val{prereg-date}). Two changes followed it. Before the hypotheses were first evaluated on
-hardware data, we corrected the analysis code so that calibration age is measured at job start
-instead of at the time the snapshot was downloaded; only the age covariate of H4 is affected.
-Session~2 on both devices ran at about 18:25~UTC, in the evening in India, whereas session~1
-ran in the morning, the slot planned for the remaining sessions; sessions therefore differ in
-time of day as well as date.
-\todo{After session 5: confirm the times of sessions 3--5 and add any further deviation from
-notes/deviations.md.}
+(\val{prereg-date}). Before the hypotheses were first evaluated on hardware data, we corrected
+the analysis code so that calibration age is measured at job start instead of at the time the
+snapshot was downloaded; only the age covariate of H4 is affected. The registration asked for
+sessions at a similar time of day, but the queue and the author's schedule did not always allow
+it: \val{sessions-day} sessions started in the daytime and \val{sessions-night} at night (India
+time). \val{window-sentence} \val{sessions-sentence}

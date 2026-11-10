@@ -11,6 +11,8 @@ import json
 import re
 import shutil
 import subprocess
+from collections import Counter
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import numpy as np
@@ -145,9 +147,24 @@ def numbers(cfg, proc, runs) -> dict[str, str]:
             v["prereg-date"], v["prereg-commit"] = tag
     except Exception:
         pass
+    v["coverage-target-frac"] = f"{1 - ex['alpha']:.2f}"
     if camp:
         v["session-usage-mean"] = f"{np.mean([r['usage_s'] for r in camp]):.1f}"
         v["campaign-first"], v["campaign-last"] = min(r["start"] for r in camp)[:10], max(r["start"] for r in camp)[:10]
+        per_dev = Counter(r["device"] for r in camp)
+        lo_n, hi_n, planned = min(per_dev.values()), max(per_dev.values()), hw["sessions_per_device"]
+        v["sessions-done-per-device"] = str(lo_n) if lo_n == hi_n else f"{lo_n}--{hi_n}"
+        ist = [datetime.fromisoformat(r["start"]) + timedelta(hours=5, minutes=30) for r in camp if r["start"]]
+        days = (max(ist).date() - min(ist).date()).days    # calendar days in IST, first to last session
+        v["campaign-days"] = days
+        v["sessions-day"] = sum(6 <= t.hour < 18 for t in ist)
+        v["sessions-night"] = len(ist) - v["sessions-day"]
+        late = days - WINDOW_DAYS
+        v["window-sentence"] = (f"All sessions ran within the registered {WINDOW_DAYS}-day window." if late <= 0 else
+                                f"The last session ran {late} day{'s' if late > 1 else ''} after the registered "
+                                f"{WINDOW_DAYS}-day window.")
+        v["sessions-sentence"] = ("" if lo_n >= planned else
+                                  f"Only {lo_n} of the {planned} planned sessions per device were completed.")
     for name in ("sim_metrics", "baselines"):
         t = _csv(cfg.results / f"{name}.csv")
         if t is not None:
@@ -169,6 +186,11 @@ def numbers(cfg, proc, runs) -> dict[str, str]:
             stat = next((h[s] for s in ("mean_emu_minus_hw", "mean_ratio", "mean_diff") if s in h), None)
             if stat is not None:
                 v[f"{tag}-mean"], v[f"{tag}-lo"], v[f"{tag}-hi"] = f3(stat), f3(h["ci"][0]), f3(h["ci"][1])
+                if tag in ("h1", "h3"):   # accuracy differences, also in percentage points
+                    v[f"{tag}-mean-pp"], v[f"{tag}-lo-pp"], v[f"{tag}-hi-pp"] = (
+                        pp(x, signed=tag == "h3") for x in (stat, *h["ci"]))
+                if tag == "h2":
+                    v["h2-fold"] = f"{stat:.1f}"
             if "slope_hw_on_emu" in h:
                 v["h1-slope"] = f"{h['slope_hw_on_emu']:.2f}"
             if "largest_term" in h:
@@ -183,6 +205,8 @@ def numbers(cfg, proc, runs) -> dict[str, str]:
 
 REG_TERM = {"readout": "readout error", "twoq": "CZ error", "t1_us": r"$T_1$", "t2_us": r"$T_2$",
             "age_h": "calibration age"}
+WINDOW_DAYS = 14   # registered campaign window (preregistration.md: 5 sessions per device over 10-14 days)
+LABEL = {"device": tt, "dataset": lambda n: DS[n].lower(), "model": esc}
 
 
 def pp(x, signed: bool = True) -> str:
@@ -200,9 +224,15 @@ def result_numbers(cfg) -> dict:
         w = met.pivot_table(index=["device", "session", "dataset", "model"], columns="method", values="acc")
         v["n-cases"] = len(w)
         gap = w["SIM"] - w["R0"]
+        v["gap-pos-count"] = int((gap > 0).sum())
         for level in ("device", "dataset", "model"):
-            for name, g in gap.groupby(level=level):
-                v[key("gap", short(name), "pp")] = pp(g.mean(), signed=False)
+            g = gap.groupby(level=level).mean()
+            for name, x in g.items():
+                v[key("gap", short(name), "pp")] = pp(x, signed=False)
+            v[f"gap-max-{level}"], v[f"gap-min-{level}"] = LABEL[level](g.idxmax()), LABEL[level](g.idxmin())
+            v[f"gap-max-{level}-pp"], v[f"gap-min-{level}-pp"] = pp(g.max(), False), pp(g.min(), False)
+        r0rows = met[met["method"] == "R0"]
+        v["r0-ci-half-pp"] = f"{100 * ((r0rows['acc_hi'] - r0rows['acc_lo']) / 2).mean():.0f}"
         if "EMU" in w:
             d = (w["EMU"] - w["R0"]).dropna()
             v["emu-over-count"], v["emu-cases"] = int((d > 0).sum()), len(d)
@@ -226,6 +256,7 @@ def result_numbers(cfg) -> dict:
             v[key("gapshare", r["method"])] = f"{100 * r['recovered_frac']:.0f}" if np.isfinite(r["recovered_frac"]) else "--"
         best = rec.sort_values("acc_gain", ascending=False).iloc[0]
         v["rep-best"], v["rep-best-gain-pp"] = METHOD.get(best["method"], esc(best["method"])), pp(best["acc_gain"])
+        v["gapshare-max"] = f"{100 * rec['recovered_frac'].max():.0f}"
         if "n_gap" in rec:
             v["n-gap-cases"] = int(rec["n_gap"].max())
     fits = _csv(cfg.results / "noise_fits.csv")
@@ -235,7 +266,7 @@ def result_numbers(cfg) -> dict:
             v[f"nm-{name}-q1"], v[f"nm-{name}-median"], v[f"nm-{name}-q3"] = f3(q1), f3(q2), f3(q3)
         v["nm-absbeta-median"], v["nm-fits"] = f3(fits["beta"].abs().median()), len(fits)
         for mo, g in fits.groupby("model"):
-            v[key("nm-gamma", mo)], v[key("nm-r2", mo)] = f3(g["gamma"].median()), f3(g["r2"].median())
+            v[key("nm", "gamma", mo)], v[key("nm", "r2", mo)] = f3(g["gamma"].median()), f3(g["r2"].median())
         sd = fits.groupby(["device", "dataset", "model", "feature"])["gamma"].std(ddof=1).dropna()
         if len(sd):
             v["nm-gamma-sd-median"] = f3(sd.median())
@@ -245,13 +276,19 @@ def result_numbers(cfg) -> dict:
             for name, g in od.groupby(level):
                 v[key("od", short(name))] = f"{g['ratio'].mean():.2f}"
         v["od-frac-above-1"] = f"{100 * (od['ratio'] > 1).mean():.0f}"
+        dev = od.groupby("device")["ratio"].mean()
+        v["od-max-device"], v["od-min-device"] = tt(dev.idxmax()), tt(dev.idxmin())
+        v["od-max"], v["od-min"] = f"{dev.max():.2f}", f"{dev.min():.2f}"
     reg = _csv(cfg.results / "regression.csv")
     if reg is not None and len(reg):
         for _, r in reg.iterrows():
             k = key("reg", r["term"])
             v[k + "-coef"], v[k + "-lo"], v[k + "-hi"] = (f"{x:.4f}" for x in (r["coef"], r["lo"], r["hi"]))
             v[k + "-p"] = "<0.001" if r["p"] < 0.001 else f"{r['p']:.3f}"
-        v["reg-largest"] = REG_TERM.get(reg.iloc[reg["coef"].abs().argmax()]["term"], "--")
+        top = reg.iloc[reg["coef"].abs().argmax()]
+        v["reg-largest"] = REG_TERM.get(top["term"], "--")
+        v["reg-largest-coef"], v["reg-largest-lo"], v["reg-largest-hi"] = (
+            f"{x:.4f}" for x in (top["coef"], top["lo"], top["hi"]))
     cp = _csv(cfg.results / "conformal.csv")
     if cp is not None and len(cp):
         for meth, g in cp.groupby("method"):
@@ -261,6 +298,70 @@ def result_numbers(cfg) -> dict:
             v[k + "-later"] = f3(later.mean()) if len(later) else "--"
             v[key("size", meth)] = f"{g['set_size'].mean():.2f}"
     return v
+
+
+def claims(cfg) -> list[tuple[str, bool, str]]:
+    """Directional statements of the text, re-checked against results/ on every build.
+
+    Each id is tagged `% claim:<id>` next to its sentence in paper/. Numbers come from \\val{},
+    but words such as "optimistic" or "mostly on one device" do not, so new data could silently
+    contradict them; a failing claim means the tagged sentence must be rewritten."""
+    met, rec, cp, fits, od, reg = (_csv(cfg.results / f"{n}.csv") for n in
+                                   ("metrics", "recovered", "conformal", "noise_fits", "overdispersion", "regression"))
+    path = cfg.results / "hypotheses.json"
+    hyp = json.loads(path.read_text()) if path.exists() else {}
+    if met is None or rec is None or cp is None:
+        return []
+    target = 1 - cfg["experiment"]["alpha"]
+    w = met.pivot_table(index=["device", "session", "dataset", "model"], columns="method", values="acc")
+    gap = w["SIM"] - w["R0"]
+    r = rec.set_index("method")
+    cov, size = cp.groupby("method")["coverage"].mean(), cp.groupby("method")["set_size"].mean()
+    later = cp[cp["session"] > 1].groupby("method")["coverage"].mean()
+    ece = met.groupby("method")["ece"].mean()
+    h1 = hyp.get("H1_emulator_overestimates", {})
+    lo1 = lambda m: round(100 * r.loc[m, "gain_lo"], 1)   # lower bound as printed (1 decimal)
+    spread = lambda level: np.ptp(gap.groupby(level=level).mean().to_numpy())
+    checks = {
+        "gap-task": lambda: (gap.groupby(level="dataset").mean().get("two_curves") -
+                             gap.groupby(level="dataset").mean().get("breast_cancer") >
+                             max(spread("model"), spread("device")), "task difference exceeds model and device spread"),
+        "emu-optimistic": lambda: (h1["ci"][0] > 0, f"H1 interval {h1['ci']}"),
+        "emu-ranks-well": lambda: (np.corrcoef(w["EMU"], w["R0"])[0, 1] >= 0.6, "r >= 0.6"),
+        "emu-slope-above-1": lambda: (h1["slope_hw_on_emu"] > 1, f"slope {h1['slope_hw_on_emu']:.2f}"),
+        "drift-one-device": lambda: ((d := od.groupby("device")["ratio"].mean()).min() < 1.5 and d.max() > 2 * d.min(),
+                                     d.round(2).to_dict()),
+        "h4-not-readout": lambda: (hyp["H4_readout_strongest"]["largest_term"] != "readout",
+                                   hyp["H4_readout_strongest"]["largest_term"]),
+        "t2-negative": lambda: (reg.set_index("term").loc["t2_us", "hi"] < 0, "T2 interval below zero"),
+        "gamma-below-1": lambda: (fits["gamma"].median() < 1, f"median {fits['gamma'].median():.3f}"),
+        "gamma-stable": lambda: ((s := fits.groupby(["device", "dataset", "model", "feature"])["gamma"].std(ddof=1)
+                                  .median()) < (fits["gamma"].quantile(0.75) - fits["gamma"].quantile(0.25)) / 2,
+                                 f"session SD {s:.3f} vs half IQR"),
+        "gamma-models-differ": lambda: (np.ptp(fits.groupby("model")["gamma"].median().to_numpy()) >
+                                        2 * fits.groupby(["device", "dataset", "model", "feature"])["gamma"]
+                                        .std(ddof=1).median(), "model medians differ by > 2 session SDs"),
+        "small-recovery": lambda: (rec["recovered_frac"].max() <= 0.2, f"max {rec['recovered_frac'].max():.2f}"),
+        "r4-r3m-positive": lambda: (lo1("R4") >= 0 and lo1("R3m") >= 0, f"R4 {lo1('R4')}, R3m {lo1('R3m')}"),
+        "only-two-positive": lambda: (sum(lo1(m) >= 0 for m in r.index) == 2, "exactly two lower bounds >= 0"),
+        "r4-best": lambda: (rec.sort_values("acc_gain").iloc[-1]["method"] == "R4", "R4 has the largest mean gain"),
+        "r2-no-gain": lambda: (all(r.loc[m, "gain_lo"] <= 0 <= r.loc[m, "gain_hi"] for m in r.index if m.startswith("R2")),
+                               "every R2 interval contains zero"),
+        "r1-no-gain": lambda: (r.loc["R1", "gain_lo"] <= 0 and r.loc["R1", "acc_gain"] <= 0.005, "R1 gain <= 0.5 pp"),
+        "r4-best-ece": lambda: (ece.drop(["SIM", "EMU", "R0"], errors="ignore").idxmin() == "R4", "lowest ECE"),
+        "cpsim-under": lambda: (cov["CP_sim"] < target, f"{cov['CP_sim']:.3f}"),
+        "hwcal-over": lambda: (later["CP_s1"] > target and cov["CP_same"] > target, "both above target"),
+        "aci-near": lambda: (abs(cov["ACI"] - target) <= 0.02, f"{cov['ACI']:.3f}"),
+        "aci-smaller-sets": lambda: (size["ACI"] < min(size["CP_s1"], size["CP_same"]), "ACI sets smallest"),
+    }
+    out = []
+    for cid, fn in checks.items():
+        try:
+            ok, detail = fn()
+        except Exception as exc:   # missing table or column: report it rather than pass silently
+            ok, detail = False, f"could not evaluate ({type(exc).__name__}: {exc})"
+        out.append((cid, bool(ok), str(detail)))
+    return out
 
 
 # ---------------------------------------------------------------- tables
@@ -462,6 +563,11 @@ def build(cfg, proc, log=print, compile_pdf: bool = False) -> Path:
     (gen / "refs.bib").write_text(paper_bib((cfg.root / "literature" / "refs.bib").read_text()))
     log(f"wrote {len(vals)} numbers, {sum(t is not None for t in tables.values())} tables and {len(figs)} figures "
         f"to {gen.relative_to(cfg.root)} ({n_sessions} hardware session(s))")
+    checks = claims(cfg)
+    (gen / "claims.txt").write_text("".join(f"{'ok  ' if ok else 'FAIL'} {cid}: {d}\n" for cid, ok, d in checks))
+    failed = [(cid, d) for cid, ok, d in checks if not ok]
+    log(f"claims: {len(checks) - len(failed)} of {len(checks)} hold" +
+        "".join(f"\n  FAIL {cid}: {d} -> rewrite the sentence tagged % claim:{cid}" for cid, d in failed))
     if compile_pdf:
         if not shutil.which("tectonic"):
             raise SystemExit("tectonic not found; install it with `brew install tectonic` or use Overleaf")

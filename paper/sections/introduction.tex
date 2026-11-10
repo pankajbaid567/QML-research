@@ -33,8 +33,8 @@ extra circuits competes with the experiment itself.
 
 This paper reports such a measurement. We train three small classifiers on two datasets in
 simulation, freeze them, and run the same \val{n-hw-samples} inputs per dataset on two IBM
-Heron r2 processors, \val{devices}, in \val{sessions-per-device} sessions per device over two
-weeks. Packing \val{patches} copies of each \val{n-qubits}-qubit circuit onto disjoint groups of
+Heron r2 processors, \val{devices}, in \val{sessions-done-per-device} sessions per device over
+\val{campaign-days} days. Packing \val{patches} copies of each \val{n-qubits}-qubit circuit onto disjoint groups of
 qubits keeps a session near \val{session-usage-mean}~s of QPU time, so the whole campaign fits
 one free account. Hypotheses, analysis and decision rules were registered before the first
 session. We ask four questions:

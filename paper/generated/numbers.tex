@@ -101,6 +101,7 @@
 \qdset{cal-age-max-h}{0.4}
 \qdset{cal-age-min-h}{0.2}
 \qdset{campaign-cap}{400}
+\qdset{campaign-days}{8}
 \qdset{campaign-first}{2026-10-27}
 \qdset{campaign-last}{2026-11-04}
 \qdset{cost-R1}{0.00}
@@ -124,6 +125,7 @@
 \qdset{cov-CPsim-later}{0.851}
 \qdset{cov-CPsim-min}{0.693}
 \qdset{coverage-target}{90\%}
+\qdset{coverage-target-frac}{0.90}
 \qdset{devices}{\texttt{ibm\_fez} and \texttt{ibm\_kingston}}
 \qdset{ece-EMU}{0.079}
 \qdset{ece-R0}{0.128}
@@ -171,9 +173,22 @@
 \qdset{gap-breastcancer-pp}{4.8}
 \qdset{gap-fez-pp}{8.5}
 \qdset{gap-kingston-pp}{11.0}
+\qdset{gap-max-dataset}{two curves}
+\qdset{gap-max-dataset-pp}{14.8}
+\qdset{gap-max-device}{\texttt{ibm\_kingston}}
+\qdset{gap-max-device-pp}{11.0}
+\qdset{gap-max-model}{M3}
+\qdset{gap-max-model-pp}{12.5}
 \qdset{gap-max-pp}{26.7}
 \qdset{gap-mean-pp}{9.8}
+\qdset{gap-min-dataset}{breast cancer}
+\qdset{gap-min-dataset-pp}{4.8}
+\qdset{gap-min-device}{\texttt{ibm\_fez}}
+\qdset{gap-min-device-pp}{8.5}
+\qdset{gap-min-model}{M1}
+\qdset{gap-min-model-pp}{8.1}
 \qdset{gap-min-pp}{-1.3}
+\qdset{gap-pos-count}{33}
 \qdset{gap-twocurves-pp}{14.8}
 \qdset{gapshare-R1}{-2}
 \qdset{gapshare-R216}{1}
@@ -183,19 +198,27 @@
 \qdset{gapshare-R3m}{10}
 \qdset{gapshare-R3r}{8}
 \qdset{gapshare-R4}{5}
+\qdset{gapshare-max}{10}
 \qdset{h1-decision}{supported}
 \qdset{h1-hi}{0.078}
+\qdset{h1-hi-pp}{7.8}
 \qdset{h1-lo}{0.041}
+\qdset{h1-lo-pp}{4.1}
 \qdset{h1-mean}{0.059}
+\qdset{h1-mean-pp}{5.9}
 \qdset{h1-slope}{1.27}
 \qdset{h2-decision}{supported}
+\qdset{h2-fold}{2.7}
 \qdset{h2-hi}{3.077}
 \qdset{h2-lo}{2.345}
 \qdset{h2-mean}{2.685}
 \qdset{h3-decision}{not supported}
 \qdset{h3-hi}{0.011}
+\qdset{h3-hi-pp}{+1.1}
 \qdset{h3-lo}{-0.003}
+\qdset{h3-lo-pp}{-0.3}
 \qdset{h3-mean}{0.004}
+\qdset{h3-mean-pp}{+0.4}
 \qdset{h4-decision}{not supported}
 \qdset{h4-largest}{CZ error}
 \qdset{h5-aci-hi}{0.906}
@@ -227,19 +250,19 @@
 \qdset{n-val}{100}
 \qdset{nm-absbeta-median}{0.009}
 \qdset{nm-fits}{312}
+\qdset{nm-gamma-M1}{0.865}
+\qdset{nm-gamma-M2}{0.951}
+\qdset{nm-gamma-M3}{0.879}
 \qdset{nm-gamma-median}{0.914}
 \qdset{nm-gamma-q1}{0.853}
 \qdset{nm-gamma-q3}{0.960}
 \qdset{nm-gamma-sd-median}{0.020}
+\qdset{nm-r2-M1}{0.830}
+\qdset{nm-r2-M2}{0.941}
+\qdset{nm-r2-M3}{0.853}
 \qdset{nm-r2-median}{0.895}
 \qdset{nm-r2-q1}{0.777}
 \qdset{nm-r2-q3}{0.972}
-\qdset{nmgamma-M1}{0.865}
-\qdset{nmgamma-M2}{0.951}
-\qdset{nmgamma-M3}{0.879}
-\qdset{nmr2-M1}{0.830}
-\qdset{nmr2-M2}{0.941}
-\qdset{nmr2-M3}{0.853}
 \qdset{noise-aware-shots}{2,000}
 \qdset{od-M1}{3.25}
 \qdset{od-M2}{2.74}
@@ -248,6 +271,10 @@
 \qdset{od-fez}{4.27}
 \qdset{od-frac-above-1}{57}
 \qdset{od-kingston}{1.10}
+\qdset{od-max}{4.27}
+\qdset{od-max-device}{\texttt{ibm\_fez}}
+\qdset{od-min}{1.10}
+\qdset{od-min-device}{\texttt{ibm\_kingston}}
 \qdset{od-twocurves}{2.72}
 \qdset{patch-buffer}{1}
 \qdset{patches}{14}
@@ -268,6 +295,7 @@
 \qdset{queue-max-all-h}{4.9}
 \qdset{queue-max-h}{1.9}
 \qdset{queue-median-h}{0.3}
+\qdset{r0-ci-half-pp}{6}
 \qdset{r0-spread-max-pp}{12.0}
 \qdset{r0-spread-mean-pp}{5.7}
 \qdset{readout-shots}{2000}
@@ -277,6 +305,9 @@
 \qdset{reg-ageh-lo}{0.0062}
 \qdset{reg-ageh-p}{<0.001}
 \qdset{reg-largest}{CZ error}
+\qdset{reg-largest-coef}{0.0200}
+\qdset{reg-largest-hi}{0.0240}
+\qdset{reg-largest-lo}{0.0160}
 \qdset{reg-readout-coef}{0.0118}
 \qdset{reg-readout-hi}{0.0156}
 \qdset{reg-readout-lo}{0.0080}
@@ -298,9 +329,13 @@
 \qdset{seed}{20261026}
 \qdset{session-pubs}{12}
 \qdset{session-usage-mean}{20.5}
+\qdset{sessions-day}{4}
 \qdset{sessions-done}{6}
+\qdset{sessions-done-per-device}{3}
+\qdset{sessions-night}{2}
 \qdset{sessions-per-device}{5}
 \qdset{sessions-planned}{10}
+\qdset{sessions-sentence}{Only 3 of the 5 planned sessions per device were completed.}
 \qdset{shots}{500}
 \qdset{sim-acc-breastcancer-M1}{0.967}
 \qdset{sim-acc-breastcancer-M2}{0.933}
@@ -315,3 +350,4 @@
 \qdset{tc-degree}{5}
 \qdset{tc-noise}{0.01}
 \qdset{tc-offset}{0.1}
+\qdset{window-sentence}{All sessions ran within the registered 14-day window.}
