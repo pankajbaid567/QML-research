@@ -38,16 +38,21 @@ For a fixed device, dataset and model, R0 accuracy moved across sessions by
 95\% interval of about $\pm\val{r0-ci-half-pp}$ points, so this spread alone does not show drift.
 The feature-level test does: across sessions, the variance of an input's features was
 \val{h2-mean} times the variance expected from shot noise (interval \val{h2-lo} to \val{h2-hi}),
-and H2 is \val{h2-decision}. The excess came mostly from \val{od-max-device}, with a mean ratio of
-\val{od-max}; on \val{od-min-device} the ratio was \val{od-min}, close to the value of one
-expected without drift. % claim:drift-one-device
+and H2 is \val{h2-decision}. Both devices contributed, with mean ratios of \val{od-fez}
+(\val{od-fez-lo} to \val{od-fez-hi}) on \texttt{ibm\_fez} and \val{od-kingston}
+(\val{od-kingston-lo} to \val{od-kingston-hi}) on \texttt{ibm\_kingston}. % claim:drift-both-devices
+Much of the change was an improvement: the mean absolute difference between hardware and
+simulator features fell from \val{fe-fez-first} in the first session to \val{fe-fez-last} in the
+last on \texttt{ibm\_fez}, and from \val{fe-kingston-first} to \val{fe-kingston-last} on
+\texttt{ibm\_kingston}. % claim:fe-decreases
 
 To see which reported quantities track the feature error, we regressed each test input's mean
 absolute feature error on the calibration of its qubit chain (coefficients per standard
 deviation of each covariate). The largest coefficient belonged to the \val{reg-largest}
 (\val{reg-largest-coef}, interval \val{reg-largest-lo} to \val{reg-largest-hi}). The readout
 error, which H4 expected to dominate, had \val{reg-readout-coef} (\val{reg-readout-lo} to
-\val{reg-readout-hi}), so H4 is \val{h4-decision}. % claim:h4-not-readout
+\val{reg-readout-hi}), so H4 is \val{h4-decision}. % claim:h4-not-readout claim:readout-positive
+\val{flag-sentence} % claim:h4-hinges-on-flagged
 Chains with a longer $T_2$ had smaller errors (\val{reg-t2us-coef}). % claim:t2-negative
 Calibration age takes one value per session and therefore absorbs differences between
 sessions, so we do not interpret its coefficient.
@@ -72,13 +77,13 @@ processors and is stable over the campaign. Removing it does not recover accurac
 \label{sec:rq4}
 No repair closed much of the gap (Table~\ref{tab:repairs}, Fig.~\ref{fig:repair-cost}): none
 recovered more than \val{gapshare-max}\% of it. % claim:small-recovery
-Two repairs improved accuracy with intervals at or above zero. % claim:only-two-positive claim:r4-r3m-positive
-The head trained on emulated noisy features (R4) gained \val{gain-R4-pp} points (interval
-\val{gain-R4-lo} to \val{gain-R4-hi}) at no QPU cost, % claim:r4-best
-and measured readout mitigation (R3$_\mathrm{m}$) gained \val{gain-R3m-pp} points
-(\val{gain-R3m-lo} to \val{gain-R3m-hi}) for \val{cost-R3m}~s per session. Mitigation with the
-reported readout errors (R3$_\mathrm{r}$) gave \val{gain-R3r-pp} points. The few-shot refits of
-the head stayed within their intervals of zero for every $k$, % claim:r2-no-gain
+Only two repairs improved accuracy with intervals above zero. % claim:only-two-positive claim:r4-r3m-positive
+Measured readout mitigation (R3$_\mathrm{m}$) gained \val{gain-R3m-pp} points (interval
+\val{gain-R3m-lo} to \val{gain-R3m-hi}) for \val{cost-R3m}~s per session, and the head trained
+on emulated noisy features (R4) gained \val{gain-R4-pp} points (\val{gain-R4-lo} to
+\val{gain-R4-hi}) at no QPU cost. % claim:top2-r3m-r4
+Mitigation with the reported readout errors (R3$_\mathrm{r}$) gave \val{gain-R3r-pp} points. For
+every $k$, the interval of the few-shot refit included zero, % claim:r2-no-gain
 and normalisation (R1) changed accuracy by \val{gain-R1-pp} points. % claim:r1-no-gain
 Against R1, R2$_{16}$ differed by \val{h3-mean-pp} points (\val{h3-lo-pp} to \val{h3-hi-pp}), so
 H3 is \val{h3-decision}. R4 also gave the best-calibrated probabilities, with an expected

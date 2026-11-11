@@ -23,3 +23,12 @@ checks, PDF copies of figures) is in the git history only.
 - 10 Nov 2026, 20:42 IST (last day of the 14-day window): sessions 4 and 5 not run yet on either
   device (3 of 5 done). Whatever happens next is reported in the paper through generated
   sentences (window and session counts in paper/sections/discussion.tex).
+- 10-11 Nov 2026: ibm_fez s4 and ibm_kingston s4 ran 10 Nov 22:39 IST (last day of the window).
+  ibm_kingston s5 ran 11 Nov 01:34 IST, only 2.9 h after s4, so that pair measures variation within
+  one night. ibm_fez s5 was refused by the pending-job guard (s4 not fetched yet) and has not run.
+  Campaign span 14.7 days (registered maximum 14). All reported in the paper by generated sentences.
+- 12 Nov 2026: two exploratory checks added (not registered; the registered statistics stay the
+  primary results): H2 without sessions that start < 12 h after the previous one on the same device
+  (ratio 3.53 vs 3.93 registered), and the H4 regression without the chains whose couplers the
+  run-time calibration marked non-operational (2 couplers, ibm_kingston s3; readout error becomes
+  the largest term, so the registered H4 decision rests on those inputs).

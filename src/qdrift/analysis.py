@@ -468,6 +468,73 @@ def figures(t: dict, out: Path, alpha: float) -> list[Path]:
     return paths
 
 
+MIN_GAP_H = 12.0   # sessions closer than this to the previous one on the same device are "repeats"
+FLAG_CZ_ERROR = 0.5   # reported CZ error at or above this marks a coupler as non-operational (IBM uses 1.0)
+
+
+def session_starts(cfg) -> dict:
+    """Job start time (UTC) of every saved session, keyed by (device, session number)."""
+    out = {}
+    for device in devices_for(cfg):
+        for p in session_dirs(cfg, device):
+            m = json.loads((p / "meta.json").read_text())
+            ts = (m.get("job_timestamps") or {}).get("running") or m["created_utc"]
+            out[(device, int(m["session"]))] = datetime.fromisoformat(ts)
+    return out
+
+
+def close_repeats(starts: dict, min_gap_h: float = MIN_GAP_H) -> list[dict]:
+    """Sessions that started less than `min_gap_h` hours after the previous session on their device."""
+    out = []
+    for dev in sorted({d for d, _ in starts}):
+        ss = sorted((s, t) for (d, s), t in starts.items() if d == dev)
+        for (s0, t0), (s1, t1) in zip(ss, ss[1:]):
+            gap = (t1 - t0).total_seconds() / 3600
+            if gap < min_gap_h:
+                out.append({"device": dev, "session": s1, "previous": s0, "gap_h": gap})
+    return out
+
+
+def sensitivity(cfg, t: dict) -> dict:
+    """Exploratory check, not pre-registered: H2 without sessions that repeat the previous one
+    within MIN_GAP_H hours, since such a pair measures variation within a night, not between days."""
+    ex = cfg["experiment"]
+    rep = close_repeats(session_starts(cfg))
+    out = {"rule": f"exclude sessions starting < {MIN_GAP_H:g} h after the previous one on the same device",
+           "excluded": rep}
+    if rep:
+        drop = {(r["device"], r["session"]) for r in rep}
+        s = t["samples"]
+        keep = s[[(d, int(x)) not in drop for d, x in zip(s["device"], s["session"])]]
+        od = overdispersion(keep)
+        if len(od):   # needs at least two remaining sessions per device, dataset and model
+            mean, lo, hi = _mean_ci(od["ratio"], ex["bootstrap"], ex["seed"])
+            out["h2"] = {"mean_ratio": mean, "ci": [lo, hi],
+                         "by_device": {k: float(v) for k, v in od.groupby("device")["ratio"].mean().items()}}
+    # Couplers of the frozen chains that the calibration at job start reported as non-operational
+    # (IBM reports error 1.0); the H4 regression is refitted without the inputs on those chains.
+    flagged = []
+    for device in devices_for(cfg):
+        for p in session_dirs(cfg, device):
+            S = load_session(p)
+            err = {frozenset((e["a"], e["b"])): e["error"] for e in S["snap"]["edges"]}
+            for k, chain in enumerate(S["meta"]["patches"]):
+                for a, b in zip(chain, chain[1:]):
+                    e = err.get(frozenset((a, b)))
+                    if e is not None and e >= FLAG_CZ_ERROR:
+                        flagged.append({"device": device, "session": int(S["meta"]["session"]), "slot": k,
+                                        "coupler": [a, b], "error": e})
+    out["flagged_couplers"] = flagged
+    if flagged:
+        bad = {(f["device"], f["session"], f["slot"]) for f in flagged}
+        s = t["samples"]
+        keep = s[[(d, int(x), int(k)) not in bad for d, x, k in zip(s["device"], s["session"], s["slot"])]]
+        reg = calibration_regression(keep)
+        out["h4_without_flagged"] = {"n_dropped": int(len(s) - len(keep)), "terms": reg.to_dict(orient="records"),
+                                     "largest_term": reg.iloc[reg["coef"].abs().argmax()]["term"] if len(reg) else None}
+    return out
+
+
 def analyze(cfg, proc, log=print) -> dict:
     t = evaluate(cfg, proc)
     if t["metrics"].empty:
@@ -483,6 +550,7 @@ def analyze(cfg, proc, log=print) -> dict:
         t[name].to_csv(res / f"{name}.csv", index=False)
     t["samples"].drop(columns=["feats"]).to_csv(res / "samples.csv", index=False)
     (res / "hypotheses.json").write_text(json.dumps(hyp, indent=1, default=float))
+    (res / "sensitivity.json").write_text(json.dumps(sensitivity(cfg, t), indent=1, default=str))
     figs = figures(t, res / "figures", cfg["experiment"]["alpha"])
     log(t["recovered"].to_string(index=False))
     log(json.dumps(hyp, indent=1, default=float))

@@ -1,6 +1,6 @@
 \begin{table}[t]
 \centering
-\caption{Repairs ranked by mean accuracy gain over R0 in percentage points, with a 95\% bootstrap interval over 36 cases (device, session, dataset, model); mean share of the simulator-to-hardware gap recovered in the 30 cases with a gap above 2 points; and extra QPU seconds per session.}
+\caption{Repairs ranked by mean accuracy gain over R0 in percentage points, with a 95\% bootstrap interval over 54 cases (device, session, dataset, model); mean share of the simulator-to-hardware gap recovered in the 46 cases with a gap above 2 points; and extra QPU seconds per session.}
 \label{tab:repairs}
 \footnotesize
 \setlength{\tabcolsep}{3.5pt}
@@ -8,14 +8,14 @@
 \toprule
 Repair & Gain (pp) & Gap (\%) & QPU (s) \\
 \midrule
-R4 & +0.8 [+0.0, +1.6] & 5 & 0.00 \\
-R3$_{\mathrm{m}}$ & +0.7 [+0.2, +1.2] & 10 & 1.06 \\
-R3$_{\mathrm{r}}$ & +0.3 [-0.2, +0.9] & 8 & 0.00 \\
-R2$_{16}$ & +0.2 [-0.2, +0.6] & 1 & 0.25 \\
-R2$_{16}^{\mathrm{s1}}$ & +0.2 [-0.3, +0.6] & 5 & 0.08 \\
-R2$_{8}$ & -0.1 [-0.6, +0.4] & -3 & 0.13 \\
-R1 & -0.3 [-1.0, +0.5] & -2 & 0.00 \\
-R2$_{32}$ & -0.3 [-0.7, +0.1] & 1 & 0.50 \\
+R3$_{\mathrm{m}}$ & +1.1 [+0.6, +1.7] & 16 & 1.06 \\
+R4 & +0.9 [+0.3, +1.6] & 6 & 0.00 \\
+R2$_{16}$ & +0.3 [-0.0, +0.7] & 3 & 0.25 \\
+R2$_{16}^{\mathrm{s1}}$ & +0.3 [-0.1, +0.7] & 4 & 0.06 \\
+R3$_{\mathrm{r}}$ & +0.1 [-0.5, +0.7] & 3 & 0.00 \\
+R2$_{8}$ & +0.0 [-0.3, +0.4] & -0 & 0.13 \\
+R2$_{32}$ & -0.1 [-0.4, +0.2] & 1 & 0.50 \\
+R1 & -0.1 [-0.7, +0.4] & -2 & 0.00 \\
 \bottomrule
 \end{tabular}
 \end{table}
