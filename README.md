@@ -77,6 +77,7 @@ preregistration.md hypotheses and decision rules (tagged before the campaign)
 
 ## Status
 
-Pre-registered on 26-27 Oct 2026 (tag `prereg-v1`). Pilots done on ibm_fez and ibm_kingston.
-Campaign: session 1 done on both devices (27 Oct); four more per device to go. Changes after
-the tag are listed in `notes/deviations.md`. The paper skeleton builds (`paper/build/main.pdf`).
+Pre-registered on 26-27 Oct 2026 (tag `prereg-v1`). Campaign complete: 10 sessions on ibm_fez and
+ibm_kingston, 227 s of QPU time. Changes after the tag are listed in `notes/deviations.md`.
+`uv run qdrift paper --build` writes `paper/Final_Research_Paper.pdf` and
+`paper/Interim_Report_Intro_LitReview_ProblemStatement.pdf` (git-ignored).

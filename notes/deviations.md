@@ -25,11 +25,15 @@ checks, PDF copies of figures) is in the git history only.
   sentences (window and session counts in paper/sections/discussion.tex).
 - 10-11 Nov 2026: ibm_fez s4 and ibm_kingston s4 ran 10 Nov 22:39 IST (last day of the window).
   ibm_kingston s5 ran 11 Nov 01:34 IST, only 2.9 h after s4, so that pair measures variation within
-  one night. ibm_fez s5 has not run. The reason is not confirmed; the pending-job guard would have blocked a
-  second fez job while s4 was unfetched, but no output of that attempt was seen.
-  Campaign span 14.7 days (registered maximum 14). All reported in the paper by generated sentences.
+  one night. ibm_fez s5 ran later (see the 12 Nov entry).
+  Campaign span was 14.7 days on 11 Nov (registered maximum 14). All reported in the paper by generated sentences.
 - 12 Nov 2026: two exploratory checks added (not registered; the registered statistics stay the
   primary results): H2 without sessions that start < 12 h after the previous one on the same device
   (ratio 3.53 vs 3.93 registered), and the H4 regression without the chains whose couplers the
   run-time calibration marked non-operational (2 couplers, ibm_kingston s3; readout error becomes
   the largest term, so the registered H4 decision rests on those inputs).
+- 12 Nov 2026: ibm_fez s5 (job dbqtmdujjaos73ahud6g) ran at 20:58 IST in the evening, 2.4 days after s4,
+  so all 10 registered sessions exist. The campaign spanned 16.5 days (registered maximum 14).
+  Two generated claim checks failed on the new data and the sentences were rewritten: R2_16 now has a
+  gain interval that starts at zero, so "only two repairs helped" became "two helped clearly, a third
+  is borderline" (abstract, introduction, results). Authors: the paper now lists three authors.

@@ -93,3 +93,11 @@ calibrated on the simulator under-covers (0.69-0.91), ACI stays near 0.90.
    device over 10-14 days.
 5. Reading log: 42 entries in literature/reading-log.md; `scripts/check_reading_log.py`
    lists open items. Bib entries marked VERIFY need author lists checked.
+
+## 12 Nov 2026, 23:30 IST: campaign complete
+- 10 of 10 sessions (ibm_fez 5, ibm_kingston 5), all valid, config hash = prereg-v1; 227 s of 1,200 s used.
+- Final numbers (macros in paper/generated/numbers.tex): gap 9.2 points, emulator +5.5, variance ratio 3.8,
+  R3m +1.0, R4 +0.8, R2_16 +0.3 (interval starts at 0), ACI coverage 0.901.
+- PDFs: paper/Interim_Report_Intro_LitReview_ProblemStatement.pdf (5 pages) and
+  paper/Final_Research_Paper.pdf (11 pages incl. references). Group paper: Pankaj Baid, Kartikey Gupta,
+  Shreshtha Gupta. Open: repository URL and DOI, authors revise the AI drafts, confirm affiliation/e-mails.

@@ -34,9 +34,10 @@ points (95\% interval \val{h1-lo-pp} to \val{h1-hi-pp}) but ranked the configura
 Between sessions, the variance of the features was \val{h2-fold} times what shot noise alone allows, on both devices, % claim:drift-both-devices claim:h2-supported
 and both processors moved closer to the simulator over the campaign. A linear % claim:fe-decreases
 scale-and-shift map described the noise well and stayed stable. % claim:gamma-stable
-Low-cost repairs recovered at most \val{gapshare-max}\% of the accuracy gap; only measured readout
+Low-cost repairs recovered at most \val{gapshare-max}\% of the accuracy gap; measured readout
 mitigation (\val{gain-R3m-pp} points) and a classical head trained on emulated noisy features
-(\val{gain-R4-pp} points, no extra QPU time) helped. % claim:small-recovery claim:only-two-positive claim:top2-r3m-r4
+(\val{gain-R4-pp} points, no extra QPU time) helped most, % claim:small-recovery claim:top2-r3m-r4
+and the other repairs did not give a clear gain. % claim:others-include-zero
 Conformal sets calibrated in simulation under-covered on hardware, while hardware calibration and
 adaptive conformal inference restored coverage. % claim:cpsim-under claim:hwcal-over claim:aci-near
 Code, models and raw data are released.
@@ -67,7 +68,7 @@ the authors, and do not reflect the official policy or position of IBM or the IB
 % IEEE requires AI-generated content (text, code, figures) to be disclosed here. Keep this
 % sentence accurate: edit it if you rewrite the drafts, and check your course's AI policy.
 The analysis software and first drafts of parts of this manuscript were prepared with the help
-of an AI assistant (Kiro); the author reviewed, revised and verified all code, text and results.
+of an AI assistant (Kiro); the authors reviewed, revised and verified all code, text and results.
 
 \bibliographystyle{IEEEtran}
 \bibliography{generated/refs}

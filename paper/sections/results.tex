@@ -80,14 +80,16 @@ processors and is stable over the campaign. Removing it does not recover accurac
 \label{sec:rq4}
 No repair closed much of the gap (Table~\ref{tab:repairs}, Fig.~\ref{fig:repair-cost}): none
 recovered more than \val{gapshare-max}\% of it. % claim:small-recovery
-Only two repairs improved accuracy with intervals above zero. % claim:only-two-positive claim:r4-r3m-positive
+Two repairs improved accuracy with intervals above zero. % claim:r4-r3m-positive
 Measured readout mitigation (R3$_\mathrm{m}$) gained \val{gain-R3m-pp} points (interval
 \val{gain-R3m-lo} to \val{gain-R3m-hi}) for \val{cost-R3m}~s per session, and the head trained
 on emulated noisy features (R4) gained \val{gain-R4-pp} points (\val{gain-R4-lo} to
 \val{gain-R4-hi}) at no QPU cost. % claim:top2-r3m-r4
-Mitigation with the reported readout errors (R3$_\mathrm{r}$) gave \val{gain-R3r-pp} points. For
-every $k$, the interval of the few-shot refit included zero, % claim:r2-no-gain
-and normalisation (R1) changed accuracy by \val{gain-R1-pp} points. % claim:r1-no-gain
+The refit of the head on 16 labelled hardware inputs (R2$_{16}$) gained \val{gain-R216-pp}
+points, but its interval starts at zero (\val{gain-R216-lo} to \val{gain-R216-hi}). % claim:r216-borderline
+The intervals of all other repairs include zero, among them mitigation with the reported readout
+errors (R3$_\mathrm{r}$, \val{gain-R3r-pp} points) and normalisation (R1, \val{gain-R1-pp}
+points). % claim:others-include-zero claim:r1-no-gain
 Against R1, R2$_{16}$ differed by \val{h3-mean-pp} points (\val{h3-lo-pp} to \val{h3-hi-pp}), so
 H3 is \val{h3-decision}. R4 also gave the best-calibrated probabilities, with an expected
 calibration error of \val{ece-R4} against \val{ece-R0} without repair and \val{ece-SIM} in the

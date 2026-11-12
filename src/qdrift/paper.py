@@ -158,7 +158,7 @@ def numbers(cfg, proc, runs) -> dict[str, str]:
         starts = [datetime.fromisoformat(r["start"]) for r in camp if r["start"]]
         ist = [t + timedelta(hours=5, minutes=30) for t in starts]
         span = (max(starts) - min(starts)).total_seconds() / 86400   # first to last session start, in days
-        v["campaign-days"], v["campaign-span-days"] = f"{span:.0f}", f"{span:.1f}"
+        v["campaign-days"], v["campaign-span-days"] = f"{int(span)}", f"{span:.1f}"   # floor, so "over N days" is always true
         v["sessions-day"] = sum(6 <= t.hour < 18 for t in ist)
         v["sessions-night"] = len(ist) - v["sessions-day"]
         v["window-sentence"] = (
@@ -231,6 +231,8 @@ REG_TERM = {"readout": "readout error", "twoq": "CZ error", "t1_us": r"$T_1$", "
             "age_h": "calibration age"}
 WINDOW_DAYS = 14   # registered campaign window (preregistration.md: 5 sessions per device over 10-14 days)
 LABEL = {"device": tt, "dataset": lambda n: DS[n].lower(), "model": esc}
+# Named copies of the two PDFs in paper/ (git-ignored): the three-section interim report and the full paper.
+PDF_NAMES = {"main": "Final_Research_Paper.pdf", "interim": "Interim_Report_Intro_LitReview_ProblemStatement.pdf"}
 
 
 def pp(x, signed: bool = True) -> str:
@@ -414,11 +416,13 @@ def claims(cfg) -> list[tuple[str, bool, str]]:
                                         .std(ddof=1).median(), "model medians differ by > 2 session SDs"),
         "small-recovery": lambda: (rec["recovered_frac"].max() <= 0.2, f"max {rec['recovered_frac'].max():.2f}"),
         "r4-r3m-positive": lambda: (lo1("R4") > 0 and lo1("R3m") > 0, f"R4 {lo1('R4'):.4f}, R3m {lo1('R3m'):.4f}"),
-        "only-two-positive": lambda: (sum(lo1(m) > 0 for m in r.index) == 2, "exactly two lower bounds > 0"),
         "top2-r3m-r4": lambda: (set(rec.sort_values("acc_gain").iloc[-2:]["method"]) == {"R3m", "R4"},
                                 "R3m and R4 have the two largest mean gains"),
-        "r2-no-gain": lambda: (all(r.loc[m, "gain_lo"] <= 0 <= r.loc[m, "gain_hi"] for m in r.index if m.startswith("R2")),
-                               "every R2 interval contains zero"),
+        "r216-borderline": lambda: (abs(r.loc["R2_16", "gain_lo"]) <= 0.001 and r.loc["R2_16", "acc_gain"] > 0,
+                                    f"R2_16 lower end {100 * r.loc['R2_16', 'gain_lo']:+.3f} pp"),
+        "others-include-zero": lambda: (all(r.loc[m, "gain_lo"] <= 0 <= r.loc[m, "gain_hi"] for m in r.index
+                                            if m not in ("R3m", "R4", "R2_16")),
+                                        "all repairs except R3m, R4 and R2_16 have an interval containing zero"),
         "r1-no-gain": lambda: (r.loc["R1", "gain_lo"] <= 0 and r.loc["R1", "acc_gain"] <= 0.005, "R1 gain <= 0.5 pp"),
         "r4-best-ece": lambda: (ece.drop(["SIM", "EMU", "R0"], errors="ignore").idxmin() == "R4", "lowest ECE"),
         "cpsim-under": lambda: (cov["CP_sim"] < target, f"{cov['CP_sim']:.3f}"),
@@ -655,4 +659,6 @@ def build(cfg, proc, log=print, compile_pdf: bool = False) -> Path:
                                       or "undefined" in ln.lower()))
             log(f"{doc}: " + ("\n".join(warn[:20]) if warn else "no LaTeX warnings (underfull boxes ignored)"))
             log(f"built {(paper / 'build' / f'{doc}.pdf').relative_to(cfg.root)}")
+            shutil.copy2(paper / "build" / f"{doc}.pdf", paper / PDF_NAMES[doc])
+            log(f"copied to {(paper / PDF_NAMES[doc]).relative_to(cfg.root)}")
     return gen

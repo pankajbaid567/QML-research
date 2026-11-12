@@ -1,26 +1,26 @@
 ok   gap-task: task difference exceeds model and device spread
-ok   emu-optimistic: H1 interval [0.0420956790123457, 0.07271604938271604]
-ok   gap-positive: mean gap 0.094
+ok   emu-optimistic: H1 interval [0.04166666666666667, 0.06899999999999998]
+ok   gap-positive: mean gap 0.092
 ok   h2-supported: H2 supported
 ok   emu-ranks-well: r >= 0.6
-ok   emu-slope-above-1: slope 1.32
-ok   drift-both-devices: registered {'ibm_fez': 3.62, 'ibm_kingston': 4.24}, sensitivity {'ibm_fez': 3.6171999767613623, 'ibm_kingston': 3.438096470634995}
+ok   emu-slope-above-1: slope 1.31
+ok   drift-both-devices: registered {'ibm_fez': 3.36, 'ibm_kingston': 4.24}, sensitivity {'ibm_fez': 3.3646677487775363, 'ibm_kingston': 3.438096470634995}
 ok   fe-decreases: last session below first on every device
 ok   h4-hinges-on-flagged: without flagged chains: readout
 ok   readout-positive: readout interval above zero
 ok   h4-not-readout: twoq
 ok   t2-negative: T2 interval below zero
-ok   gamma-below-1: median 0.925
-ok   gamma-stable: session SD 0.025 vs half IQR
+ok   gamma-below-1: median 0.922
+ok   gamma-stable: session SD 0.026 vs half IQR
 ok   gamma-models-differ: model medians differ by > 2 session SDs
-ok   small-recovery: max 0.16
-ok   r4-r3m-positive: R4 0.0027, R3m 0.0060
-ok   only-two-positive: exactly two lower bounds > 0
+ok   small-recovery: max 0.15
+ok   r4-r3m-positive: R4 0.0020, R3m 0.0056
 ok   top2-r3m-r4: R3m and R4 have the two largest mean gains
-ok   r2-no-gain: every R2 interval contains zero
+ok   r216-borderline: R2_16 lower end +0.000 pp
+ok   others-include-zero: all repairs except R3m, R4 and R2_16 have an interval containing zero
 ok   r1-no-gain: R1 gain <= 0.5 pp
 ok   r4-best-ece: lowest ECE
-ok   cpsim-under: 0.848
+ok   cpsim-under: 0.849
 ok   hwcal-over: both above target
 ok   aci-near: 0.901
 ok   aci-smaller-sets: ACI sets smallest
