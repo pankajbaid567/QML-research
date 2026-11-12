@@ -1,5 +1,6 @@
-% Draft written with an AI assistant on 31 Oct 2026 from the frozen design. Revise it in your
-% own words before submission and run scripts/check_paper.py --overlap.
+% Draft written with an AI assistant (31 Oct 2026, revised 12 Nov 2026). Revise it in your own
+% words before submission and run scripts/check_paper.py --overlap. Numbers are \val{} macros;
+% directional words are tagged "% claim:<id>" and re-checked by `uv run qdrift paper`.
 \section{Introduction}
 \label{sec:intro}
 
@@ -13,8 +14,8 @@ differently a few days later, or on a sister device.
 
 Earlier work has measured and narrowed the simulator-to-hardware gap at one point in time.
 QuantumNAT showed that noise acts on measured outputs roughly as a scale and a shift, and
-corrected for it with normalisation and noise-aware training \cite{wang2022quantumnat}. Readout
-mitigation removes much of the measurement error at little cost
+corrected for it with normalisation and noise-aware training \cite{wang2022quantumnat}.
+Readout-error mitigation targets the bias that measurement errors add to expectation values
 \cite{nation2021m3,vandenberg2022trex}. For uncertainty, conformal prediction turns a few
 measurement shots into prediction sets with a coverage guarantee \cite{park2023qcp}, but noise
 that changes over time can void the guarantee; an adaptive variant restores average coverage,
@@ -22,22 +23,23 @@ shown with data taken on one processor on a single day \cite{spencer2026aqcp}. O
 periods, a study of QAOA on three Heron processors found that emulators built from calibration
 data overstated the hardware benefit of calibration-aware compilation \cite{qaoa2026drift}, and
 a hardware benchmark on biosignal tasks found that test sets of the size a small budget allows
-give unstable estimates \cite{qbiobench2026}.
+give unstable estimates \cite{qbiobench2026}. Section~\ref{sec:litreview} reviews this work.
 
-For classifiers, a measurement is still missing that repeats the same frozen models over
-several days and on more than one device, separates day-to-day variation from shot noise, and
-prices each repair in QPU time. The last point matters because free cloud access, such as IBM's
-Open Plan, provides ten minutes of processor time per 28 days\footnote{IBM Quantum plans:
+For classifiers, a measurement is still missing, to our knowledge, that repeats the same frozen
+models over several days and on more than one device, separates day-to-day variation from shot
+noise, and prices each repair in QPU time. The last point matters because free cloud access,
+such as IBM's Open Plan, provides ten minutes of processor time per 28
+days\footnote{IBM Quantum plans:
 \url{https://quantum.cloud.ibm.com/docs/en/guides/plans-overview}.}; any repair that needs
 extra circuits competes with the experiment itself.
 
 This paper reports such a measurement. We train three small classifiers on two datasets in
 simulation, freeze them, and run the same \val{n-hw-samples} inputs per dataset on two IBM
 Heron r2 processors, \val{devices}, in \val{sessions-done-per-device} sessions per device over
-\val{campaign-days} days. Packing \val{patches} copies of each \val{n-qubits}-qubit circuit onto disjoint groups of
-qubits keeps a session near \val{session-usage-mean}~s of QPU time, so the whole campaign fits
-one free account. Hypotheses, analysis and decision rules were registered before the first
-session. We ask four questions:
+\val{campaign-days} days. Packing \val{patches} copies of each \val{n-qubits}-qubit circuit onto
+disjoint groups of qubits keeps a session near \val{session-usage-mean}~s of QPU time, so the
+whole campaign fits one free account. Hypotheses, analysis and decision rules were registered
+before the first campaign session. We ask four questions:
 \begin{itemize}
 \item[RQ1] How large is the accuracy gap between simulator and hardware, and how well does an
 emulator built from the reported calibration predict it?
@@ -51,17 +53,30 @@ over time?
 Our contributions are:
 \begin{itemize}
 \item a pre-registered, budget-capped protocol for tracking QML classifiers on cloud hardware,
-with circuit packing checked for crosstalk in a pilot (Section~\ref{sec:methods});
-\item paired measurements on two devices that answer RQ1--RQ4 (Section~\ref{sec:results});
-\item a comparison of five repair families by accuracy gained per QPU second, including a
-few-shot refit of the classical head and adaptive conformal prediction;
+with circuit packing checked for crosstalk in a pilot\iffull{ (Section~\ref{sec:methods})}{};
+\item paired measurements on two devices that answer RQ1--RQ4\iffull{
+(Section~\ref{sec:results})}{};
+\item a comparison of four repair families by the accuracy they gain per QPU second, and of
+four ways to calibrate conformal prediction sets;
 \item the code, frozen models and raw data, with calibration snapshots taken at submission and
 at job start.
 \end{itemize}
+
 We make no claim of quantum advantage. In simulation, tuned classical models match or beat the
 quantum models: on two curves an RBF support vector machine reaches
 \val{base-acc-twocurves-rbfsvm} against \val{sim-acc-twocurves-M1} for the best quantum model,
-and on breast cancer the best accuracies differ by less than their confidence intervals
-(Table~\ref{tab:sim}), in line with recent benchmark studies
+and on breast cancer the best accuracies differ by less than their confidence
+intervals\iffull{ (Table~\ref{tab:sim})}{}, in line with recent benchmark studies
 \cite{bowles2024benchmarking,schuld2022advantage}. Our question is how reliably a given quantum
-model behaves once it leaves the simulator.
+model behaves once it leaves the simulator. In brief, hardware accuracy was \val{gap-mean-pp}
+points below the simulator on average, % claim:gap-positive
+the variance of the features between sessions was \val{h2-fold} times the variance expected from
+shot noise, % claim:h2-supported
+and only two of the eight repairs we tested gave a measurable gain. % claim:only-two-positive
+
+\iffull{The rest of this paper is organised as follows. Section~\ref{sec:litreview} reviews the
+literature, Section~\ref{sec:problem} states the problem, Section~\ref{sec:methods} describes the
+methodology, Section~\ref{sec:results} reports and discusses the results, and
+Section~\ref{sec:conclusion} concludes.}{The remainder of this report reviews the literature
+(Section~\ref{sec:litreview}) and states the problem (Section~\ref{sec:problem}); the
+methodology, the results and the conclusion are part of the full paper.}

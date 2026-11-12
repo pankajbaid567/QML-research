@@ -1,6 +1,6 @@
 % Draft written with an AI assistant on 31 Oct 2026 from config/experiment.toml and the code.
 % Revise it in your own words. Every number is a \val{} macro; keep it that way.
-\section{Methods}
+\section{Methodology}
 \label{sec:methods}
 
 \subsection{Datasets}
@@ -19,13 +19,8 @@ balanced. The same \val{n-hw-samples} inputs (pool and test set) run in every se
 
 \subsection{Models}
 All three models compute Pauli expectation features $\phi(x)$ on \val{n-qubits} qubits and
-pass them to a logistic head,
-\begin{align}
-p(y=1\mid x) &= \sigma\!\left(w^\top \frac{\phi(x)-\mu}{s}+b\right), \label{eq:head}\\
-\phi_j(x) &= \operatorname{tr}\!\left[P_j\,\rho(x)\right], \nonumber
-\end{align}
-where $\rho(x)$ is the state prepared by the circuit, $P_j$ a Pauli string, and $\mu$ and $s$
-the mean and standard deviation of the training features. \emph{M1} is a data re-uploading
+pass them to the logistic head of Eq.~\eqref{eq:model}, in which $\mu$ and $s$ are the mean and
+standard deviation of the training features. \emph{M1} is a data re-uploading
 classifier \cite{perezsalinas2020reuploading} with \val{m1-layers} layers. Each layer applies
 $R_Y(x_q)$ and a trainable $R_Z R_Y$ pair to every qubit, followed by a chain of CZ gates; a
 final trainable $R_Y$ layer closes the circuit. Its \val{m1-params} circuit parameters are
@@ -38,7 +33,7 @@ read out as $\langle X_q\rangle$, $\langle Y_q\rangle$ and $\langle Z_q\rangle$
 learning machine, related to quantum reservoir computing \cite{yasuda2023qrc}: after $R_Y(x_q)$,
 \val{m3-layers} layers of fixed random rotations and CZ chains, with the inputs re-encoded by
 $R_Z(x_q)$ between them, give $\langle Z_q\rangle$ and $\langle Z_qZ_r\rangle$
-(\val{m3-features} features). For every model the head of Eq.~\eqref{eq:head} is then fitted to
+(\val{m3-features} features). For every model the head of Eq.~\eqref{eq:model} is then fitted to
 the exact simulator features, with its regularisation chosen by five-fold cross-validation. The
 depths of M2 and M3 were selected on validation accuracy before any hardware run. Training uses
 our own state-vector simulator, which agrees with Qiskit to $10^{-10}$. The classical

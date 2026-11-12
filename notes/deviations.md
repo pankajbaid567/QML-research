@@ -25,7 +25,8 @@ checks, PDF copies of figures) is in the git history only.
   sentences (window and session counts in paper/sections/discussion.tex).
 - 10-11 Nov 2026: ibm_fez s4 and ibm_kingston s4 ran 10 Nov 22:39 IST (last day of the window).
   ibm_kingston s5 ran 11 Nov 01:34 IST, only 2.9 h after s4, so that pair measures variation within
-  one night. ibm_fez s5 was refused by the pending-job guard (s4 not fetched yet) and has not run.
+  one night. ibm_fez s5 has not run. The reason is not confirmed; the pending-job guard would have blocked a
+  second fez job while s4 was unfetched, but no output of that attempt was seen.
   Campaign span 14.7 days (registered maximum 14). All reported in the paper by generated sentences.
 - 12 Nov 2026: two exploratory checks added (not registered; the registered statistics stay the
   primary results): H2 without sessions that start < 12 h after the previous one on the same device

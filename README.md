@@ -39,10 +39,14 @@ cp config/accounts.example.toml config/accounts.toml   # git-ignored list of app
 
 ## Paper and literature
 
-- `paper/main.tex` and `paper/sections/*.tex`: IEEE two-column skeleton. Comments in each
-  section list what to cover and which papers to cite; you write the prose. Results are
-  referenced with `\val{key}` from `paper/generated/numbers.tex`, never typed by hand.
-- `uv run python scripts/check_paper.py --overlap`: citation, label, TODO and page checks, plus
+- `paper/main.tex` is the full paper (IEEE two-column) with the course sections: Abstract,
+  Introduction, Literature Review, Problem Statement, Methodology, Results and Discussion,
+  Conclusion. `paper/interim.tex` is the interim report with only the Introduction, Literature
+  Review and Problem Statement. Both include the same files in `paper/sections/`, so an edit
+  appears in both. Results are referenced with `\val{key}` from `paper/generated/numbers.tex`,
+  never typed by hand. `uv run qdrift paper --build` writes `paper/build/main.pdf` and
+  `paper/build/interim.pdf`.
+- `uv run python scripts/check_paper.py --doc main|interim --overlap`: citation, label, TODO and page checks, plus
   8-word overlap with the downloaded papers. `--draft file.txt` checks a single paragraph.
 - `uv run python scripts/fetch_papers.py`: downloads open copies of `literature/refs.bib`
   into `literature/pdfs/` (git-ignored) and writes `literature/papers.csv` with links.

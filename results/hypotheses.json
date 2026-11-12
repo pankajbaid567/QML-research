@@ -1,0 +1,45 @@
+{
+ "H1_emulator_overestimates": {
+  "mean_emu_minus_hw": 0.05765432098765433,
+  "ci": [
+   0.0420956790123457,
+   0.07271604938271604
+  ],
+  "slope_hw_on_emu": 1.315093503738809,
+  "supported": true
+ },
+ "H2_drift_beyond_shot_noise": {
+  "mean_ratio": 3.9282351207294077,
+  "ci": [
+   3.513311679161385,
+   4.391534841539503
+  ],
+  "supported": true
+ },
+ "H3_refit16_beats_normalisation": {
+  "mean_diff": 0.004444444444444449,
+  "ci": [
+   -0.0003703703703703647,
+   0.009999999999999995
+  ],
+  "supported": false
+ },
+ "H4_readout_strongest": {
+  "largest_term": "twoq",
+  "supported": false
+ },
+ "H5_split_undercovers_aci_holds": {
+  "target": 0.9,
+  "cp_s1": [
+   0.9457142857142858,
+   0.9336468253968254,
+   0.9571428571428572
+  ],
+  "aci": [
+   0.9042857142857144,
+   0.901904761904762,
+   0.9068253968253966
+  ],
+  "supported": false
+ }
+}

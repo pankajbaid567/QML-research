@@ -1,0 +1,29 @@
+% Shared by main.tex (full paper) and interim.tex (Introduction, Literature Review and Problem
+% Statement only). Numbers come from generated/numbers.tex through \val{key}; tables and figures
+% come from generated/. Never type a result by hand.
+\IEEEoverridecommandlockouts
+\usepackage[T1]{fontenc}
+\usepackage{cite}
+\usepackage{amsmath,amssymb}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{generated/figures/}}
+
+\input{generated/numbers}
+\DeclareRobustCommand{\val}[1]{\ifcsname qd@#1\endcsname\csname qd@#1\endcsname\else\textbf{??#1}\fi}
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+
+% \iffull{full-paper text}{interim-report text}: the first argument is used when the Methodology
+% section exists (full paper), the second when only the first three sections are built.
+\newcommand{\iffull}[2]{\ifcsname r@sec:methods\endcsname #1\else #2\fi}
+
+% Author block shared by both documents. The affiliation is inferred from the e-mail domain
+% (nst.rishihood.edu.in); confirm it.
+\newcommand{\qdauthor}{%
+\IEEEauthorblockN{Pankaj Baid}
+\IEEEauthorblockA{Newton School of Technology, Rishihood University\\
+Sonipat, Haryana, India\\
+pankaj.baid2024@nst.rishihood.edu.in}}

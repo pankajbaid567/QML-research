@@ -93,11 +93,36 @@ def overlap(draft_words: list[str], n: int, top: int = 12) -> float:
     return total
 
 
-def structure() -> int:
-    main = (PAPER / "main.tex").read_text()
+def resolve_iffull(text: str, full: bool) -> str:
+    """Keep the matching branch of \\iffull{full-paper text}{interim text} (nested braces allowed)."""
+    out, i, key = [], 0, "\\iffull"
+    while True:
+        j = text.find(key, i)
+        if j < 0:
+            out.append(text[i:])
+            return "".join(out)
+        out.append(text[i:j])
+        k, args = j + len(key), []
+        for _ in range(2):
+            while text[k].isspace():
+                k += 1
+            depth, start = 0, k
+            while True:
+                depth += text[k] == "{"
+                depth -= text[k] == "}"
+                k += 1
+                if depth == 0:
+                    break
+            args.append(text[start + 1:k - 1])
+        out.append(args[0] if full else args[1])
+        i = k
+
+
+def structure(doc: str = "main") -> int:
+    main = (PAPER / f"{doc}.tex").read_text()
     secs = [uncomment((PAPER / "sections" / f"{m}.tex").read_text())
             for m in re.findall(r"\\input\{sections/([^}]+)\}", uncomment(main))]
-    text = uncomment(main) + "\n" + "\n".join(secs)
+    text = resolve_iffull(uncomment(main) + "\n" + "\n".join(secs), full=(doc == "main"))
     gens = re.findall(r"\\input\{generated/(tab-[^}]+)\}", text)
     labels_src = text + "\n".join((PAPER / "generated" / f"{g}.tex").read_text() for g in gens
                                   if (PAPER / "generated" / f"{g}.tex").exists())
@@ -121,12 +146,12 @@ def structure() -> int:
     comments = sum(line.lstrip().startswith("%") for s in re.findall(r"\\input\{sections/([^}]+)\}", main)
                    for line in (PAPER / "sections" / f"{s}.tex").read_text().splitlines())
     n_words = len(words(prose(text)))
-    pdf = PAPER / "build" / "main.pdf"
+    pdf = PAPER / "build" / f"{doc}.pdf"
     if pdf.exists():
         from pypdf import PdfReader
         pages = len(PdfReader(pdf).pages)
-        if pages > 8:
-            warns.append(f"{pages} pages; the class limit is 6-8")
+        if pages > 12:
+            warns.append(f"{pages} pages; check the page limit of the class or venue")
         print(f"pdf: {pages} page(s) (built {pdf.relative_to(ROOT)})")
     print(f"prose: {n_words} words; cited: {len(cited)} of {len(bib)} references; "
           f"{len(labels)} figure/table labels; {comments} guidance comment line(s) in sections")
@@ -140,6 +165,7 @@ def structure() -> int:
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--overlap", action="store_true")
+    ap.add_argument("--doc", default="main", choices=["main", "interim"], help="which document to check")
     ap.add_argument("--draft", type=Path, help="check the overlap of a plain-text or .tex file")
     ap.add_argument("-n", type=int, default=8, help="words per matching run (default 8)")
     a = ap.parse_args()
@@ -147,9 +173,9 @@ def main():
         raw = a.draft.read_text()
         share = overlap(words(prose(raw) if a.draft.suffix == ".tex" else raw), a.n)
         sys.exit(1 if share >= 0.10 else 0)
-    errors = structure()
+    errors = structure(a.doc)
     if a.overlap:
-        main_tex = (PAPER / "main.tex").read_text()
+        main_tex = (PAPER / f"{a.doc}.tex").read_text()
         body = "\n".join((PAPER / "sections" / f"{s}.tex").read_text()
                          for s in re.findall(r"\\input\{sections/([^}]+)\}", uncomment(main_tex)))
         abstract = re.search(r"\\begin\{abstract\}(.*?)\\end\{abstract\}", main_tex, re.S)

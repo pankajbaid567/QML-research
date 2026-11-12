@@ -31,3 +31,16 @@ Only claims checked against abstracts or text read earlier. Keep other citations
 - QCE allows 8-10 pages plus 2 pages of references, so no cuts are needed.
 - To finish after the last session: fetch, validate, analyze, `qdrift paper --build`; rewrite any
   sentence whose claim fails; fill the repository URL and DOI at release.
+
+## 12 Nov 2026: course structure and interim report
+- The course requires these sections: Abstract, Introduction, Literature Review, Problem
+  Statement, Methodology, Results and Discussion, Conclusion. The teacher reviews Introduction,
+  Literature Review and Problem Statement first (16 Nov).
+- paper/interim.tex = only those three sections (+ references, acknowledgment); paper/main.tex =
+  the complete paper. Both input the same files, so one edit updates both.
+- New: sections/literature-review.tex (7 themed subsections, a comparison table of the closest
+  studies, and the research gap), sections/problem-statement.tex (setting, quantities, RQ and
+  hypothesis table, scope). Related Work was merged into the Literature Review; Methods became
+  Methodology; Results and Discussion are one section.
+- Every statement about another paper was checked against its abstract or text (literature/pdfs).
+- Fixed: a sentence in the old Discussion lost its first words to a stray % comment.

@@ -388,6 +388,8 @@ def claims(cfg) -> list[tuple[str, bool, str]]:
                              gap.groupby(level="dataset").mean().get("breast_cancer") >
                              max(spread("model"), spread("device")), "task difference exceeds model and device spread"),
         "emu-optimistic": lambda: (h1["ci"][0] > 0, f"H1 interval {h1['ci']}"),
+        "gap-positive": lambda: (gap.mean() > 0, f"mean gap {gap.mean():.3f}"),
+        "h2-supported": lambda: (hyp["H2_drift_beyond_shot_noise"]["supported"] is True, "H2 supported"),
         "emu-ranks-well": lambda: (np.corrcoef(w["EMU"], w["R0"])[0, 1] >= 0.6, "r >= 0.6"),
         "emu-slope-above-1": lambda: (h1["slope_hw_on_emu"] > 1, f"slope {h1['slope_hw_on_emu']:.2f}"),
         "drift-both-devices": lambda: ((d := od.groupby("device")["ratio"].mean()).min() > 2
@@ -643,13 +645,14 @@ def build(cfg, proc, log=print, compile_pdf: bool = False) -> Path:
         if not shutil.which("tectonic"):
             raise SystemExit("tectonic not found; install it with `brew install tectonic` or use Overleaf")
         (paper / "build").mkdir(exist_ok=True)
-        res = subprocess.run(["tectonic", "--keep-logs", "--outdir", "build", "main.tex"], cwd=paper,
-                             capture_output=True, text=True)
-        if res.returncode != 0:
-            raise SystemExit(res.stderr[-3000:])
-        warn = list(dict.fromkeys(ln for ln in res.stderr.splitlines()
-                                  if ("warning: " in ln.lower() and "underfull" not in ln.lower())
-                                  or "undefined" in ln.lower()))
-        log("\n".join(warn[:20]) if warn else "no LaTeX warnings (underfull boxes ignored)")
-        log(f"built {(paper / 'build' / 'main.pdf').relative_to(cfg.root)}")
+        for doc in ("main", "interim"):     # full paper and the three-section interim report
+            res = subprocess.run(["tectonic", "--keep-logs", "--outdir", "build", f"{doc}.tex"], cwd=paper,
+                                 capture_output=True, text=True)
+            if res.returncode != 0:
+                raise SystemExit(f"{doc}.tex failed:\n" + res.stderr[-3000:])
+            warn = list(dict.fromkeys(ln for ln in res.stderr.splitlines()
+                                      if ("warning: " in ln.lower() and "underfull" not in ln.lower())
+                                      or "undefined" in ln.lower()))
+            log(f"{doc}: " + ("\n".join(warn[:20]) if warn else "no LaTeX warnings (underfull boxes ignored)"))
+            log(f"built {(paper / 'build' / f'{doc}.pdf').relative_to(cfg.root)}")
     return gen

@@ -1,0 +1,34 @@
+% INTERIM REPORT: the three sections that are reviewed first (Introduction, Literature Review,
+% Problem Statement). The section files are shared with the full paper (main.tex), so editing
+% a section updates both documents. Build: `uv run qdrift paper --build`.
+\documentclass[10pt,conference]{IEEEtran}
+\input{preamble}
+
+\begin{document}
+
+\title{Noise Drift of Simulator-Trained Quantum Classifiers on IBM Heron Processors:
+Introduction, Literature Review and Problem Statement}
+
+\author{\qdauthor}
+
+\maketitle
+
+\noindent\textit{Interim report. It contains the Introduction, the Literature Review and the
+Problem Statement of the full paper. The abstract, methodology, results and discussion, and
+conclusion are in the full paper.}
+
+\input{sections/introduction}
+\input{sections/literature-review}
+\input{sections/problem-statement}
+
+\section*{Acknowledgment}
+% Same wording as in main.tex; keep both documents consistent.
+We acknowledge the use of IBM Quantum services for this work. The views expressed are those of
+the authors, and do not reflect the official policy or position of IBM or the IBM Quantum team.
+The analysis software and first drafts of parts of this manuscript were prepared with the help
+of an AI assistant (Kiro); the author reviewed, revised and verified all code, text and results.
+
+\bibliographystyle{IEEEtran}
+\bibliography{generated/refs}
+
+\end{document}

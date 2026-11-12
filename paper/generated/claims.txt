@@ -1,5 +1,7 @@
 ok   gap-task: task difference exceeds model and device spread
 ok   emu-optimistic: H1 interval [0.0420956790123457, 0.07271604938271604]
+ok   gap-positive: mean gap 0.094
+ok   h2-supported: H2 supported
 ok   emu-ranks-well: r >= 0.6
 ok   emu-slope-above-1: slope 1.32
 ok   drift-both-devices: registered {'ibm_fez': 3.62, 'ibm_kingston': 4.24}, sensitivity {'ibm_fez': 3.6171999767613623, 'ibm_kingston': 3.438096470634995}

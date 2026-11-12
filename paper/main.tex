@@ -1,37 +1,22 @@
-% IEEE two-column conference paper. Build: `uv run qdrift paper --build` (tectonic) or upload
-% the whole paper/ folder to Overleaf. Numbers come from generated/numbers.tex through \val{key};
-% tables and figures come from generated/. Never type a result by hand.
+% FULL PAPER (IEEE two-column conference format). Sections follow the course template:
+% Abstract, Introduction, Literature Review, Problem Statement, Methodology, Results and
+% Discussion, Conclusion. Build: `uv run qdrift paper --build` (tectonic) or upload the whole
+% paper/ folder to Overleaf. The interim report (first three sections only) is interim.tex.
 %
 % WRITING RULES (similarity check < 15%):
 %  - Write every sentence yourself. Do not paste from papers, the reading log or AI tools.
 %  - Quote rarely, one short sentence at most, in quotation marks, with \cite.
 %  - Delete the guidance comments (%) before submission and run scripts/check_paper.py.
 \documentclass[10pt,conference]{IEEEtran}
-\IEEEoverridecommandlockouts
-\usepackage[T1]{fontenc}
-\usepackage{cite}
-\usepackage{amsmath,amssymb}
-\usepackage{graphicx}
-\usepackage{booktabs}
-\usepackage{xcolor}
-\usepackage[hidelinks]{hyperref}
-\graphicspath{{generated/figures/}}
-
-\input{generated/numbers}
-\DeclareRobustCommand{\val}[1]{\ifcsname qd@#1\endcsname\csname qd@#1\endcsname\else\textbf{??#1}\fi}
-\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+\input{preamble}
 
 \begin{document}
 
-% Working title; change it once the results are in.
+% Working title; change it once the results are final.
 \title{Noise Drift of Simulator-Trained Quantum Classifiers on IBM Heron Processors:
 A Pre-Registered Multi-Day Study of Low-Cost Repairs}
 
-% Affiliation inferred from the e-mail domain (nst.rishihood.edu.in); confirm it.
-\author{\IEEEauthorblockN{Pankaj Baid}
-\IEEEauthorblockA{Newton School of Technology, Rishihood University\\
-Sonipat, Haryana, India\\
-pankaj.baid2024@nst.rishihood.edu.in}}
+\author{\qdauthor}
 
 \maketitle
 
@@ -43,10 +28,10 @@ hardware whose noise differs from the simulator and changes from day to day. We 
 hand-over for three small classifiers on two datasets, run unchanged on two IBM Heron r2
 processors in \val{sessions-done-per-device} sessions per device over \val{campaign-days} days,
 under a pre-registered design and \val{qpu-used}~s of free-tier QPU time. Hardware accuracy fell
-\val{gap-mean-pp} points below the simulator on average. An emulator built from the reported
-calibration overstated hardware accuracy by \val{h1-mean-pp} points (95\% interval
-\val{h1-lo-pp} to \val{h1-hi-pp}) but ranked the configurations well. % claim:emu-ranks-well
-Between sessions, features varied \val{h2-fold} times more than shot noise allows, on both devices, % claim:drift-both-devices
+\val{gap-mean-pp} points below the simulator on average. % claim:gap-positive
+An emulator built from the reported calibration overstated hardware accuracy by \val{h1-mean-pp}
+points (95\% interval \val{h1-lo-pp} to \val{h1-hi-pp}) but ranked the configurations well. % claim:emu-ranks-well
+Between sessions, the variance of the features was \val{h2-fold} times what shot noise alone allows, on both devices, % claim:drift-both-devices claim:h2-supported
 and both processors moved closer to the simulator over the campaign. A linear % claim:fe-decreases
 scale-and-shift map described the noise well and stayed stable. % claim:gamma-stable
 Low-cost repairs recovered at most \val{gapshare-max}\% of the accuracy gap; only measured readout
@@ -62,8 +47,9 @@ quantum machine learning, noise drift, error mitigation, conformal prediction, N
 \end{IEEEkeywords}
 
 \input{sections/introduction}
-\input{sections/related-work}
-\input{sections/methods}
+\input{sections/literature-review}
+\input{sections/problem-statement}
+\input{sections/methodology}
 \input{sections/results}
 \input{sections/discussion}
 \input{sections/conclusion}
