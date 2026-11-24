@@ -7,8 +7,9 @@ The output, paper/overleaf/Interim_Report.tex, needs no other file: every \\val{
 by its number from paper/generated/numbers.tex, the full-paper-only branches of \\iffull are
 dropped, the comments used by this repository's tooling are removed, and the bibliography is
 inlined as a thebibliography environment (the .bbl that IEEEtran.bst produces), so no .bib file
-and no BibTeX run is needed. The file is then compiled once in an empty folder to check that it
-stands alone.
+and no BibTeX run is needed. The printed reference list can be switched off: the default
+(\\showrefsfalse or \\showrefstrue) is read from paper/interim.tex. The file is then compiled in
+an empty folder, with the switch as exported and flipped, to check that it stands alone.
 """
 
 import re
@@ -36,12 +37,22 @@ HEADER = r"""% =================================================================
 %      references are in the thebibliography block at the end.
 %   3. To change a reference, edit its \bibitem entry at the end; to add a citation, add a
 %      \bibitem with a new key and use \cite{key} in the text.
+%   4. The reference list (the last page) is hidden for now, and the text keeps its citation
+%      numbers. To print the list again, change \showrefsfalse to \showrefstrue near the top.
 %
 % The text was drafted with an AI assistant and has to be revised by the authors in their own
 % words (see the Acknowledgment). Delete these comment lines before submitting.
 % ============================================================================="""
 
 PREAMBLE = r"""\documentclass[10pt,conference]{IEEEtran}
+
+% ---- SWITCH: the reference list (last page) --------------------------------------------------
+% Hidden for now. The text keeps its citation numbers [1], [2], ...; only the printed list is
+% dropped. Change \showrefsfalse to \showrefstrue (and recompile) to print the list again.
+\newif\ifshowrefs
+\showrefs@@SHOW@@
+% -----------------------------------------------------------------------------------------------
+
 \IEEEoverridecommandlockouts
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -49,8 +60,14 @@ PREAMBLE = r"""\documentclass[10pt,conference]{IEEEtran}
 \usepackage{amsmath,amssymb}
 \usepackage{array}
 \usepackage{booktabs}
-\usepackage[hidelinks]{hyperref}
+% hyperref makes citations and DOIs clickable. With the list hidden, a citation could only point
+% at the list that is not printed, so the url package and a plain \href are enough.
+\ifshowrefs\usepackage[hidelinks]{hyperref}\else\usepackage{url}\providecommand{\href}[2]{#2}\fi
 """
+
+WRAP_BEGIN = r"\ifshowrefs\else\setbox0\vbox\bgroup\fi"   # same two lines as in paper/interim.tex
+WRAP_END = r"\ifshowrefs\else\egroup\fi"
+SWITCH = r"(?m)^\\showrefs(true|false)\s*$"
 
 
 def group(text: str, i: int) -> tuple[str, int]:
@@ -118,6 +135,8 @@ def build() -> str:
     k = pre.index("\\newcommand{\\qdauthor}") + len("\\newcommand{\\qdauthor}")
     author, _ = group(pre, k)
     interim = (PAPER / "interim.tex").read_text()
+    show = re.search(SWITCH, interim)
+    assert show, "paper/interim.tex has no \\showrefstrue or \\showrefsfalse line of its own"
     a, b = interim.index("\\begin{document}") + len("\\begin{document}"), interim.index("\\end{document}")
     body = interim[a:b]
     body = re.sub(r"\\input\{sections/([^}]+)\}", lambda m: (PAPER / "sections" / f"{m.group(1)}.tex").read_text(), body)
@@ -129,7 +148,10 @@ def build() -> str:
     body = body.replace("@@BIBLIOGRAPHY@@", make_bbl().strip())
     for leftover in ("\\val{", "\\iffull", "\\input{", "\\qdauthor", "\\todo", "\\bibliography{"):
         assert leftover not in body, f"{leftover} is still in the exported body"
-    return "\n".join([HEADER.replace("{today}", date.today().isoformat()), PREAMBLE, "\\begin{document}", "",
+    assert WRAP_BEGIN in body and WRAP_END in body, "the hide-the-list lines of paper/interim.tex are missing"
+    assert body.index(WRAP_BEGIN) < body.index("\\begin{thebibliography}") < body.index(WRAP_END)
+    return "\n".join([HEADER.replace("{today}", date.today().isoformat()),
+                      PREAMBLE.replace("@@SHOW@@", show.group(1)), "\\begin{document}", "",
                       body.strip("\n"), "", "\\end{document}", ""])
 
 
@@ -142,24 +164,40 @@ def check_citations(tex: str) -> None:
     assert items <= cited, f"\\bibitem that is never cited: {sorted(items - cited)}"
 
 
-def check(tex: str) -> None:
-    """Compile the exported file alone in an empty folder and report what came out."""
+def compile_alone(tex: str, what: str) -> tuple[int, str, list[str]]:
+    """Compile tex alone in an empty folder: (page count, text of the PDF, suspicious log lines)."""
     from pypdf import PdfReader
     with tempfile.TemporaryDirectory() as d:
         (Path(d) / "main.tex").write_text(tex)
         r = subprocess.run(["tectonic", "--keep-logs", "main.tex"], cwd=d, capture_output=True, text=True)
         if r.returncode:
-            raise SystemExit("the exported file does not compile on its own:\n" + r.stderr[-3000:])
+            raise SystemExit(f"the exported file ({what}) does not compile on its own:\n" + r.stderr[-3000:])
         pdf = PdfReader(Path(d) / "main.pdf")
         text = " ".join(p.extract_text() or "" for p in pdf.pages)
         log = (Path(d) / "main.log").read_text(errors="ignore")
-        bad = [ln for ln in log.splitlines() if re.search(r"undefined|Overfull|Missing|Error", ln)
+        bad = [ln for ln in log.splitlines() if re.search(r"undefined|Overfull|Missing|Error|not exist", ln)
                and "Font shape" not in ln and "inputenc" not in ln]
-        print(f"compiled alone: {len(pdf.pages)} pages, '??' in text: {'??' in text}, "
-              f"log problems: {bad[:5] or 'none'}")
-        assert "??" not in text and "[?]" not in text, "unresolved reference or citation in the exported file"
+        return len(pdf.pages), text, bad
+
+
+def check(tex: str) -> None:
+    """Compile the exported file alone, as exported and with the reference switch flipped."""
+    default = re.search(SWITCH, tex).group(1)
+    other = "true" if default == "false" else "false"
+    flipped = re.sub(SWITCH, lambda m: "\\showrefs" + other, tex, count=1)
+    runs = {default: compile_alone(tex, "as exported"), other: compile_alone(flipped, "switch flipped")}
+    n_items = len(re.findall(r"(?m)^\\bibitem\{", tex))
+    for mode, (pages, text, bad) in runs.items():
+        print(f"compiled alone with \\showrefs{mode}: {pages} pages, log problems: {bad[:5] or 'none'}")
+        assert "??" not in text and "[?]" not in text, f"unresolved reference or citation (\\showrefs{mode})"
+        assert re.search(rf"\[\s*{n_items}\s*\]", text), f"citation [{n_items}] is missing (\\showrefs{mode})"
         for name in ("Pankaj Baid", "Kartikey Gupta", "Shreshtha Gupta"):
-            assert name in text, f"{name} missing from the exported PDF"
+            assert name in text, f"{name} missing from the exported PDF (\\showrefs{mode})"
+    hidden, shown = runs["false"], runs["true"]
+    assert not re.search(r"doi:\s*10\.", hidden[1]), "the list is printed although the switch hides it"
+    assert re.search(r"doi:\s*10\.", shown[1]), "the list is not printed although the switch shows it"
+    assert shown[0] >= hidden[0]
+    print(f"reference list hidden: {hidden[0]} pages; with \\showrefstrue: {shown[0]} pages")
 
 
 def main() -> None:

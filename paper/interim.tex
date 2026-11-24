@@ -2,6 +2,10 @@
 % Problem Statement). The section files are shared with the full paper (main.tex), so editing
 % a section updates both documents. Build: `uv run qdrift paper --build`.
 \documentclass[10pt,conference]{IEEEtran}
+% Reference list (the last page): hidden for now. The text still shows the citation numbers
+% [1], [2], ...; only the printed list is dropped. Write \showrefstrue to print it again.
+\newif\ifshowrefs
+\showrefsfalse
 \input{preamble}
 
 \begin{document}
@@ -28,7 +32,11 @@ the authors, and do not reflect the official policy or position of IBM or the IB
 The analysis software and first drafts of parts of this manuscript were prepared with the help
 of an AI assistant (Kiro); the authors reviewed, revised and verified all code, text and results.
 
+% When the list is hidden it is still typeset, into a box that is thrown away, so that every
+% \bibitem keeps its number and \cite does not print [?]. scripts/export_overleaf.py copies this.
+\ifshowrefs\else\setbox0\vbox\bgroup\fi
 \bibliographystyle{IEEEtran}
 \bibliography{generated/refs}
+\ifshowrefs\else\egroup\fi
 
 \end{document}

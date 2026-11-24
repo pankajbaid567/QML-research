@@ -33,3 +33,6 @@ paper/*.blg
 paper/*.log
 paper/*.out
 paper/*.pdf
+
+# macOS
+.DS_Store
