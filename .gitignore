@@ -36,3 +36,10 @@ paper/*.pdf
 
 # macOS
 .DS_Store
+
+# Only the final single-file paper is published; other .tex and .pdf files stay local
+*.tex
+*.pdf
+!paper/final_simple/
+!paper/final_simple/QML_research_paper.tex
+!paper/final_simple/QML_research_paper.pdf
